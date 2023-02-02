@@ -1,55 +1,19 @@
-import {
-    IsString,
-    IsEmail,
-    IsUrl,
-    IsMobilePhone,
-    IsOptional
-} from 'class-validator';
-import { Entity, Column, Index } from 'typeorm';
+import { Gender, UserBaseModel, UserModel } from '@ideamall/data-model';
+import { IsPhoneNumber, IsString } from 'class-validator';
 import { JsonWebTokenError } from 'jsonwebtoken';
 import { ParameterizedContext } from 'koa';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
-import { BaseModel, Base } from './Base';
+import { Base } from './Base';
 
-export class UserModel extends BaseModel {
-    @IsString()
-    name: string;
-
-    @IsUrl()
-    @IsOptional()
-    avatar: string;
-
-    @IsEmail()
-    @IsOptional()
-    email?: string;
-
-    @IsMobilePhone()
-    @IsOptional()
-    mobilePhone?: string;
-
-    @IsString()
-    @IsOptional()
-    password?: string;
-
-    @IsString()
-    @IsOptional()
-    token?: string;
-}
-
-export class SignInData implements Required<Pick<User, 'email' | 'password'>> {
-    @IsEmail()
-    email: string;
+export class SignInData
+    implements Required<Pick<UserModel, 'mobilePhone' | 'password'>>
+{
+    @IsPhoneNumber()
+    mobilePhone: string;
 
     @IsString()
     password: string;
-}
-
-export class SignUpData
-    extends SignInData
-    implements Required<Pick<User, 'name' | 'email' | 'password'>>
-{
-    @IsString()
-    name: string;
 }
 
 export interface JWTAction {
@@ -58,18 +22,26 @@ export interface JWTAction {
 
 @Entity()
 export class User extends Base implements UserModel {
-    @Column()
-    name: string;
+    @Column({ unique: true })
+    mobilePhone: string;
 
     @Column({ nullable: true })
-    avatar: string;
+    nickName?: string;
+
+    @Column({ enum: Gender, nullable: true })
+    gender?: Gender;
 
     @Column({ nullable: true })
-    email?: string;
-
-    @Column({ nullable: true })
-    mobilePhone?: string;
+    avatar?: string;
 
     @Column({ select: false })
     password: string;
+}
+
+export abstract class UserBase extends Base implements UserBaseModel {
+    @ManyToOne(() => User)
+    createdBy: User;
+
+    @ManyToOne(() => User)
+    updatedBy: User;
 }

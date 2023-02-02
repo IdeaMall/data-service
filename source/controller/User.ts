@@ -10,8 +10,9 @@ import {
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
 import { JsonWebTokenError, sign } from 'jsonwebtoken';
+import { UserModel } from '@ideamall/data-model';
 
-import { JWTAction, SignInData, SignUpData, UserModel, User } from '../model';
+import { JWTAction, SignInData, User } from '../model';
 import { Controller } from './Base';
 
 const { APP_SECRET } = process.env;
@@ -39,10 +40,12 @@ export class UserController extends Controller('/user', UserModel, User) {
 
     @Post('/session')
     @ResponseSchema(UserModel)
-    async signIn(@Body() { email, password }: SignInData): Promise<UserModel> {
+    async signIn(
+        @Body() { mobilePhone, password }: SignInData
+    ): Promise<UserModel> {
         const user = await this.store.findOne({
             where: {
-                email,
+                mobilePhone,
                 password: UserController.encrypt(password)
             }
         });
@@ -53,7 +56,7 @@ export class UserController extends Controller('/user', UserModel, User) {
 
     @Post()
     @ResponseSchema(UserModel)
-    async signUp(@Body() data: SignUpData) {
+    async signUp(@Body() data: SignInData) {
         const { password, ...user } = await this.store.save(
             Object.assign(new User(), data, {
                 password: UserController.encrypt(data.password)
