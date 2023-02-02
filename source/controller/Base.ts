@@ -12,8 +12,9 @@ import {
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
 import { Repository } from 'typeorm';
+import { BaseModel } from '@ideamall/data-model';
 
-import dataSource, { BaseModel, Base } from '../model';
+import dataSource, { Base } from '../model';
 
 export function Controller<M extends BaseModel, E extends Base>(
     rootPath: `/${string}`,
