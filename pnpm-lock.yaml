@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@ideamall/data-model': ^0.8.4
+  '@ideamall/data-model': ^0.9.0
   '@koa/cors': ^4.0.0
   '@koa/multer': ^3.0.2
   '@koa/router': ^12.0.0
@@ -36,7 +36,7 @@ specifiers:
   web-utility: ^4.0.0
 
 dependencies:
-  '@ideamall/data-model': 0.8.4
+  '@ideamall/data-model': 0.9.0_typescript@4.9.5
   '@koa/cors': 4.0.0
   '@koa/multer': 3.0.2
   '@koa/router': 12.0.0
@@ -334,13 +334,18 @@ packages:
     resolution: {integrity: sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==}
     optional: true
 
-  /@ideamall/data-model/0.8.4:
-    resolution: {integrity: sha512-VemkfUIDCStVPldYd+d4nfrpf+bvXA8htPrueGWYL4nR0AojvJPl15FZbItj1PepeEjOWDdJd2g/iMHn+DEXkg==, tarball: download/@ideamall/data-model/0.8.4/f7acaad704debd4d8497faeace128f69bbec32fb}
+  /@ideamall/data-model/0.9.0_typescript@4.9.5:
+    resolution: {integrity: sha512-xWpRg4rTis3sGnb8mU9cfK9m7GQDF7VYUiItBN/RI1E+E84h+6zu1Q/7Ad3FzhmT+XaQ+aZv2hgXWPnsKoEWVg==, tarball: download/@ideamall/data-model/0.9.0/60e6afd70da97d5d7aa4f0805ff58cb499e11794}
     dependencies:
       class-transformer: 0.5.1
       class-validator: 0.14.0
+      mobx-restful: 0.6.0_typescript@4.9.5
       reflect-metadata: 0.1.13
       tslib: 2.5.0
+    transitivePeerDependencies:
+      - jsdom
+      - mobx
+      - typescript
     dev: false
 
   /@jridgewell/gen-mapping/0.1.1:
@@ -1826,6 +1831,10 @@ packages:
   /isexe/2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
+  /iterable-observer/1.0.0-rc.1:
+    resolution: {integrity: sha512-mIztAg3zss799h7YtoBQr8tH7sj9iGRZInc7be7bBYpA+sE4YzIO9p66cPLtUmMprBvVjWtkR6apHgsd2FSmwg==}
+    dev: false
+
   /js-tokens/4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
     dev: false
@@ -2045,6 +2054,19 @@ packages:
       routing-controllers-openapi: 3.1.0_routing-controllers@0.9.0
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /koajax/0.8.3_typescript@4.9.5:
+    resolution: {integrity: sha512-qVJG2f/ghrkfB5H1LSOVfYg4mAyHo0pT3g997JUYA5DVvafXX7GwCOpWXX9vBVDrN4qxYM2EgRsqHa4gl6K1eA==}
+    peerDependencies:
+      jsdom: ^20.0.0
+    dependencies:
+      '@swc/helpers': 0.4.14
+      iterable-observer: 1.0.0-rc.1
+      regenerator-runtime: 0.13.11
+      web-utility: 3.9.9_typescript@4.9.5
+    transitivePeerDependencies:
+      - typescript
     dev: false
 
   /libphonenumber-js/1.10.13:
@@ -2347,6 +2369,22 @@ packages:
     resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
     engines: {node: '>=10'}
     hasBin: true
+
+  /mobx-restful/0.6.0_typescript@4.9.5:
+    resolution: {integrity: sha512-LtA8qDSHPrX/0+5WaKxj+QRWjzSxrvpzvfDcRF8PcX1Z0dzXfRERdNvN7KhBJ3mHYKYp47gZPNjabBzCqzE4YQ==}
+    peerDependencies:
+      mobx: '>=4 <6'
+    dependencies:
+      '@swc/helpers': 0.4.14
+      class-validator: 0.14.0
+      koajax: 0.8.3_typescript@4.9.5
+      reflect-metadata: 0.1.13
+      regenerator-runtime: 0.13.11
+      web-utility: 4.0.0_typescript@4.9.5
+    transitivePeerDependencies:
+      - jsdom
+      - typescript
+    dev: false
 
   /mock-json-schema/1.1.1:
     resolution: {integrity: sha512-YV23vlsLP1EEOy0EviUvZTluXjLR+rhMzeayP2rcDiezj3RW01MhOSQkbQskdtg0K2fnGas5LKbSXgNjAOSX4A==}
@@ -3735,6 +3773,17 @@ packages:
   /vary/1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
+    dev: false
+
+  /web-utility/3.9.9_typescript@4.9.5:
+    resolution: {integrity: sha512-8XGlyodk2X7lgWHZCkiOYPTCwTlBOddL8eEh1KbKhrR+uxL8+kN/RUXpLS1wDfgkhzJq5FRG6PoNCwWh/81QEQ==}
+    peerDependencies:
+      typescript: ^4.1.0
+    dependencies:
+      '@swc/helpers': 0.4.14
+      element-internals-polyfill: 1.1.17
+      regenerator-runtime: 0.13.11
+      typescript: 4.9.5
     dev: false
 
   /web-utility/4.0.0_typescript@4.9.5:
