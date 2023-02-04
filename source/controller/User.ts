@@ -1,24 +1,37 @@
-import { createHash } from 'crypto';
 import {
-    JsonController,
-    Get,
-    Post,
+    Role,
+    UserFilter,
+    UserInput,
+    UserListChunk,
+    UserOutput
+} from '@ideamall/data-model';
+import { createHash } from 'crypto';
+import { JsonWebTokenError, sign } from 'jsonwebtoken';
+import {
     Authorized,
-    CurrentUser,
     Body,
-    ForbiddenError
+    CurrentUser,
+    Delete,
+    ForbiddenError,
+    Get,
+    JsonController,
+    OnNull,
+    OnUndefined,
+    Param,
+    Post,
+    Put,
+    QueryParams
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
-import { JsonWebTokenError, sign } from 'jsonwebtoken';
-import { UserModel } from '@ideamall/data-model';
 
-import { JWTAction, SignInData, User } from '../model';
-import { Controller } from './Base';
+import dataSource, { JWTAction, SignInData, User } from '../model';
 
 const { APP_SECRET } = process.env;
 
 @JsonController('/user')
-export class UserController extends Controller('/user', UserModel, User) {
+export class UserController {
+    store = dataSource.getRepository(User);
+
     static encrypt(raw: string) {
         return createHash('sha1')
             .update(APP_SECRET + raw)
@@ -33,16 +46,16 @@ export class UserController extends Controller('/user', UserModel, User) {
 
     @Get('/session')
     @Authorized()
-    @ResponseSchema(UserModel)
-    getSession(@CurrentUser() user: UserModel) {
+    @ResponseSchema(UserOutput)
+    getSession(@CurrentUser() user: UserOutput) {
         return user;
     }
 
     @Post('/session')
-    @ResponseSchema(UserModel)
+    @ResponseSchema(UserOutput)
     async signIn(
         @Body() { mobilePhone, password }: SignInData
-    ): Promise<UserModel> {
+    ): Promise<UserOutput> {
         const user = await this.store.findOne({
             where: {
                 mobilePhone,
@@ -55,13 +68,58 @@ export class UserController extends Controller('/user', UserModel, User) {
     }
 
     @Post()
-    @ResponseSchema(UserModel)
+    @ResponseSchema(UserOutput)
     async signUp(@Body() data: SignInData) {
+        const sum = await this.store.count();
+
         const { password, ...user } = await this.store.save(
             Object.assign(new User(), data, {
-                password: UserController.encrypt(data.password)
+                password: UserController.encrypt(data.password),
+                roles: [sum ? Role.Client : Role.Root]
             })
         );
         return user;
+    }
+
+    @Put('/:id')
+    @Authorized()
+    @ResponseSchema(UserOutput)
+    updateOne(
+        @Param('id') id: number,
+        @CurrentUser() { id: ID, roles }: User,
+        @Body() data: UserInput
+    ) {
+        if (!roles.includes(Role.Root) && id !== ID) throw new ForbiddenError();
+
+        return this.store.save({ ...data, id });
+    }
+
+    @Get('/:id')
+    @OnNull(404)
+    @ResponseSchema(UserOutput)
+    getOne(@Param('id') id: number) {
+        return this.store.findOne({ where: { id } });
+    }
+
+    @Delete('/:id')
+    @Authorized()
+    @OnUndefined(204)
+    async deleteOne(
+        @Param('id') id: number,
+        @CurrentUser() { id: ID, roles }: User
+    ) {
+        if (!roles.includes(Role.Root) && id !== ID) throw new ForbiddenError();
+
+        await this.store.delete(id);
+    }
+
+    @Get()
+    @ResponseSchema(UserListChunk)
+    async getList(@QueryParams() { pageSize, pageIndex }: UserFilter) {
+        const [list, count] = await this.store.findAndCount({
+            skip: pageSize * (pageIndex - 1),
+            take: pageSize
+        });
+        return { list, count };
     }
 }

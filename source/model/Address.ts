@@ -1,10 +1,10 @@
-import { AddressModel } from '@ideamall/data-model';
+import { AddressOutput } from '@ideamall/data-model';
 import { Column, Entity } from 'typeorm';
 
 import { UserBase } from './User';
 
 @Entity()
-export class Address extends UserBase implements AddressModel {
+export class Address extends UserBase implements AddressOutput {
     @Column()
     country: string;
 
