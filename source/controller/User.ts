@@ -5,8 +5,10 @@ import {
     UserListChunk,
     UserOutput
 } from '@ideamall/data-model';
+import { AuthenticationClient } from 'authing-js-sdk';
 import { createHash } from 'crypto';
 import { JsonWebTokenError, sign } from 'jsonwebtoken';
+import { intersection } from 'lodash';
 import {
     Authorized,
     Body,
@@ -14,19 +16,21 @@ import {
     Delete,
     ForbiddenError,
     Get,
+    HeaderParam,
     JsonController,
     OnNull,
     OnUndefined,
     Param,
     Post,
     Put,
-    QueryParams
+    QueryParams,
+    UnauthorizedError
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
 
 import dataSource, { JWTAction, SignInData, User } from '../model';
 
-const { APP_SECRET } = process.env;
+const { APP_SECRET, AUTHING_APP_HOST, AUTHING_APP_ID } = process.env;
 
 @JsonController('/user')
 export class UserController {
@@ -38,10 +42,39 @@ export class UserController {
             .digest('hex');
     }
 
-    static getSession({ context: { state } }: JWTAction) {
-        return state instanceof JsonWebTokenError
-            ? console.error(state)
-            : state.user;
+    static async getAuthingUser(token: string) {
+        var [type, token] = token.split(/\s+/);
+
+        const authing = new AuthenticationClient({
+            appHost: AUTHING_APP_HOST,
+            appId: AUTHING_APP_ID,
+            token
+        });
+        const user = await authing.getCurrentUser();
+
+        if (!user) throw new UnauthorizedError();
+
+        return user;
+    }
+
+    static async getSession(
+        { context: { state, request } }: JWTAction,
+        roles: Role[] = []
+    ): Promise<UserOutput> {
+        if (!(state instanceof JsonWebTokenError)) return state.user;
+
+        const authingUser = await this.getAuthingUser(
+            request.get('Authorization')
+        );
+        const user = await dataSource
+            .getRepository(User)
+            .findOne({ where: { mobilePhone: authingUser.phone } });
+
+        if (!user) throw new UnauthorizedError();
+
+        if (!intersection(roles, user.roles).length) throw new ForbiddenError();
+
+        return user;
     }
 
     @Get('/session')
@@ -49,6 +82,17 @@ export class UserController {
     @ResponseSchema(UserOutput)
     getSession(@CurrentUser() user: UserOutput) {
         return user;
+    }
+
+    @Post('/session/authing')
+    @ResponseSchema(UserOutput)
+    async signInAuthing(@HeaderParam('Authorization') token: string) {
+        const { phone } = await UserController.getAuthingUser(token);
+
+        const user = await this.store.findOne({
+            where: { mobilePhone: phone }
+        });
+        return this.store.save({ id: user?.id, mobilePhone: phone });
     }
 
     @Post('/session')

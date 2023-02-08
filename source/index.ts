@@ -22,7 +22,8 @@ if (!isProduct) app.use(mocker());
 useKoaServer(app, {
     ...router,
     cors: true,
-    authorizationChecker: action => !!UserController.getSession(action),
+    authorizationChecker: async (action, roles) =>
+        !!(await UserController.getSession(action, roles)),
     currentUserChecker: UserController.getSession
 });
 

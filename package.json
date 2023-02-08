@@ -1,16 +1,16 @@
 {
-    "name": "@idea2app/rest-node-ts",
+    "name": "@ideamall/data-service",
     "version": "0.6.0",
     "license": "LGPL-3.0",
     "author": "shiy2008@gmail.com",
     "description": "RESTful API service of IdeaMall, which is based on Node.js & TypeScript",
-    "homepage": "https://github.com/idea2app/REST-Node-ts#readme",
+    "homepage": "https://github.com/IdeaMall/data-service#readme",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/idea2app/REST-Node-ts.git"
+        "url": "git+https://github.com/IdeaMall/data-service.git"
     },
     "bugs": {
-        "url": "https://github.com/idea2app/REST-Node-ts/issues"
+        "url": "https://github.com/IdeaMall/data-service/issues"
     },
     "source": "source/index.ts",
     "main": "dist/index.js",
@@ -22,6 +22,7 @@
         "@koa/cors": "^4.0.0",
         "@koa/multer": "^3.0.2",
         "@koa/router": "^12.0.0",
+        "authing-js-sdk": "^4.23.39",
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.0",
         "cross-env": "^7.0.3",
@@ -33,6 +34,7 @@
         "koa-logger": "^3.2.1",
         "koa-mount": "^4.0.0",
         "koagger": "^0.2.4",
+        "lodash": "^4.17.21",
         "pg": "^8.9.0",
         "pg-connection-string": "^2.5.0",
         "reflect-metadata": "^0.1.13",
@@ -46,6 +48,7 @@
         "@types/jsonwebtoken": "^8.5.9",
         "@types/koa": "^2.13.5",
         "@types/koa-logger": "^3.1.2",
+        "@types/lodash": "^4.14.191",
         "@types/node": "^16.18.12",
         "husky": "^8.0.3",
         "lint-staged": "^13.1.0",
@@ -74,7 +77,7 @@
         "migration:run": "npm run typeorm -- migration:run",
         "upgrade:dev": "npm run migration:generate -- migration/version  &&  npm run migration:run",
         "upgrade:pro": "cross-env NODE_ENV=production  npm run migration:generate -- .data/version  &&  npm run migration:run",
-        "pack-image": "docker build -t rest-node-ts:latest .",
-        "container": "docker rm -f rest-node-ts  &&  docker run --name rest-node-ts -p 8080:8080 -d rest-node-ts:latest"
+        "pack-image": "docker build -t data-service:latest .",
+        "container": "docker rm -f data-service  &&  docker run --name data-service -p 8080:8080 -d data-service:latest"
     }
 }

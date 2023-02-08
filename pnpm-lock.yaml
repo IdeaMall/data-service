@@ -8,7 +8,9 @@ specifiers:
   '@types/jsonwebtoken': ^8.5.9
   '@types/koa': ^2.13.5
   '@types/koa-logger': ^3.1.2
+  '@types/lodash': ^4.14.191
   '@types/node': ^16.18.12
+  authing-js-sdk: ^4.23.39
   class-transformer: ^0.5.1
   class-validator: ^0.14.0
   cross-env: ^7.0.3
@@ -22,6 +24,7 @@ specifiers:
   koa-mount: ^4.0.0
   koagger: ^0.2.4
   lint-staged: ^13.1.0
+  lodash: ^4.17.21
   pg: ^8.9.0
   pg-connection-string: ^2.5.0
   prettier: ^2.8.3
@@ -40,6 +43,7 @@ dependencies:
   '@koa/cors': 4.0.0
   '@koa/multer': 3.0.2
   '@koa/router': 12.0.0
+  authing-js-sdk: 4.23.39
   class-transformer: 0.5.1
   class-validator: 0.14.0
   cross-env: 7.0.3
@@ -51,6 +55,7 @@ dependencies:
   koa-logger: 3.2.1
   koa-mount: 4.0.0
   koagger: 0.2.4
+  lodash: 4.17.21
   pg: 8.9.0
   pg-connection-string: 2.5.0
   reflect-metadata: 0.1.13
@@ -64,6 +69,7 @@ devDependencies:
   '@types/jsonwebtoken': 8.5.9
   '@types/koa': 2.13.5
   '@types/koa-logger': 3.1.2
+  '@types/lodash': 4.14.191
   '@types/node': 16.18.12
   husky: 8.0.3
   lint-staged: 13.1.0
@@ -576,6 +582,10 @@ packages:
       '@types/koa-compose': 3.2.5
       '@types/node': 18.7.18
 
+  /@types/lodash/4.14.191:
+    resolution: {integrity: sha512-BdZ5BCCvho3EIXw6wUCXHe7rS53AIDPLE+JzwgT+OsJk53oBfbSmZZ7CX4VaRoN78N+TJpFi9QPlfIVNmJYWxQ==}
+    dev: true
+
   /@types/mime/3.0.1:
     resolution: {integrity: sha512-Y4XFY5VJAuw0FgAqPNd6NNoV44jbq9Bz2L7Rh/J6jLTiHBSBJa9fxqQIvkIld4GsoDOcCbvzOUAbLPsSKKg+uA==}
 
@@ -778,6 +788,27 @@ packages:
     resolution: {integrity: sha512-Z7tMw1ytTXt5jqMcOP+OQteU1VuNK9Y02uuJtKQ1Sv69jXQKKg5cibLwGJow8yzZP+eAc18EmLGPal0bp36rvQ==}
     engines: {node: '>=8'}
     dev: true
+
+  /authing-js-sdk/4.23.39:
+    resolution: {integrity: sha512-BX5xe/iv+s3Hf/324ATkZ+q022cP1Ke26uk+QzUc/G02EVS0OKMMLtAcgeoIzWM28Rfl3tjO/tWKchAvPw3lBQ==}
+    engines: {node: '>=8.9'}
+    dependencies:
+      axios: 0.26.1
+      crypto-js: 4.1.1
+      jsencrypt: 3.3.1
+      jwt-decode: 2.2.0
+      sm-crypto: 0.3.12
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /axios/0.26.1:
+    resolution: {integrity: sha512-fPwcX4EvnSHuInCMItEhAGnaSEXRBjtzh9fOtsE6E1G6p7vl7edEeZe11QHf18+6+9gR5PbKV/sGKNaD8YaMeA==}
+    dependencies:
+      follow-redirects: 1.15.2
+    transitivePeerDependencies:
+      - debug
+    dev: false
 
   /balanced-match/1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -1176,6 +1207,10 @@ packages:
       shebang-command: 2.0.0
       which: 2.0.2
 
+  /crypto-js/4.1.1:
+    resolution: {integrity: sha512-o2JlM7ydqd3Qk9CA0L4NL6mTzU2sdx96a+oOfPu8Mkl/PK51vSyoi8/rQ8NknZtk44vq15lmhAj9CIAGwgeWKw==}
+    dev: false
+
   /date-fns/2.29.3:
     resolution: {integrity: sha512-dDCnyH2WnnKusqvZZ6+jA1O51Ibt8ZMRNkDZdyAyK4YfbDwa/cEmuztzG5pk6hqlp9aSBPYcjOlktquahGwGeA==}
     engines: {node: '>=0.11'}
@@ -1456,6 +1491,16 @@ packages:
       '@babel/plugin-transform-modules-commonjs': 7.19.6_@babel+core@7.20.5
     transitivePeerDependencies:
       - supports-color
+    dev: false
+
+  /follow-redirects/1.15.2:
+    resolution: {integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
     dev: false
 
   /forwarded/0.2.0:
@@ -1845,6 +1890,14 @@ packages:
       argparse: 2.0.1
     dev: false
 
+  /jsbn/1.1.0:
+    resolution: {integrity: sha512-4bYVV3aAMtDTTu4+xsDYa6sy9GyJ69/amsu9sYF2zqjiEoZA5xJi3BrfX3uY+/IekIu7MwdObdbDWpoZdBv3/A==}
+    dev: false
+
+  /jsencrypt/3.3.1:
+    resolution: {integrity: sha512-dVvV54GdFuJgmEKn+oBiaifDMen4p6o6j/lJh0OVMcouME8sST0bJ7bldIgKBQk4za0zyGn0/pm4vOznR25mLw==}
+    dev: false
+
   /jsesc/2.5.2:
     resolution: {integrity: sha512-OYu7XEzjkCQ3C5Ps3QIZsQfNpqoJyZZA99wd9aWd05NCtC5pWOkShK2mkL6HXQR6/Cy2lbNdPlZBpuQHXE63gA==}
     engines: {node: '>=4'}
@@ -1904,6 +1957,10 @@ packages:
     dependencies:
       jwa: 1.4.1
       safe-buffer: 5.2.1
+    dev: false
+
+  /jwt-decode/2.2.0:
+    resolution: {integrity: sha512-86GgN2vzfUu7m9Wcj63iUkuDzFNYFVmjeDm2GzWpUk+opB0pEpMsw6ePCMrhYkumz2C1ihqtZzOMAg7FiXcNoQ==}
     dev: false
 
   /keygrip/1.1.0:
@@ -3242,6 +3299,12 @@ packages:
       ansi-styles: 6.1.1
       is-fullwidth-code-point: 4.0.0
     dev: true
+
+  /sm-crypto/0.3.12:
+    resolution: {integrity: sha512-272PBzB4PYaBdeGa41TH9ZlMGLPVRmS36Gs4FjmHwXIdihQypAbhhFWZTaa/3de69q2KfMme1M5O2W5+spAdrg==}
+    dependencies:
+      jsbn: 1.1.0
+    dev: false
 
   /smart-buffer/4.2.0:
     resolution: {integrity: sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==}
