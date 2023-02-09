@@ -2,7 +2,7 @@
 
 [REST][1]ful API service of IdeaMall, which is based on [Node.js][2] & [TypeScript][3]
 
-[![Deploy to Production environment](https://github.com/idea2app/REST-Node-ts/actions/workflows/deploy-production.yml/badge.svg)][4]
+[![Deploy to Production environment](https://github.com/IdeaMall/data-service/actions/workflows/deploy-production.yml/badge.svg)][4]
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)][5]
 
@@ -17,10 +17,11 @@
 
 ## Environment variables
 
-|      Name      |            Usage             |
-| :------------: | :--------------------------: |
-|  `APP_SECRET`  |   encrypt Password & Token   |
-| `DATABASE_URL` | PostgreSQL connection string |
+|         Name         |            Usage             |
+| :------------------: | :--------------------------: |
+|     `APP_SECRET`     |   encrypt Password & Token   |
+|    `DATABASE_URL`    | PostgreSQL connection string |
+| `AUTHING_APP_SECRET` | Secret Key of Authing.cn App |
 
 ## Usage
 
@@ -65,7 +66,7 @@ pnpm container
 [1]: https://en.wikipedia.org/wiki/Representational_state_transfer
 [2]: https://nodejs.org/
 [3]: https://www.typescriptlang.org/
-[4]: https://github.com/idea2app/REST-Node-ts/actions/workflows/deploy-production.yml
+[4]: https://github.com/IdeaMall/data-service/actions/workflows/deploy-production.yml
 [5]: https://render.com/deploy
 [6]: https://koajs.com/
 [7]: https://github.com/typestack/routing-controllers

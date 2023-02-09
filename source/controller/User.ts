@@ -6,7 +6,8 @@ import {
     UserOutput
 } from '@ideamall/data-model';
 import { createHash } from 'crypto';
-import { JsonWebTokenError, sign } from 'jsonwebtoken';
+import { JsonWebTokenError, sign, verify } from 'jsonwebtoken';
+import { intersection } from 'lodash';
 import {
     Authorized,
     Body,
@@ -14,19 +15,27 @@ import {
     Delete,
     ForbiddenError,
     Get,
+    HeaderParam,
     JsonController,
     OnNull,
     OnUndefined,
     Param,
     Post,
     Put,
-    QueryParams
+    QueryParams,
+    UnauthorizedError
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
+import { uniqueID } from 'web-utility';
 
-import dataSource, { JWTAction, SignInData, User } from '../model';
+import dataSource, {
+    AuthingSession,
+    JWTAction,
+    SignInData,
+    User
+} from '../model';
 
-const { APP_SECRET } = process.env;
+const { APP_SECRET, AUTHING_APP_SECRET } = process.env;
 
 @JsonController('/user')
 export class UserController {
@@ -38,10 +47,42 @@ export class UserController {
             .digest('hex');
     }
 
-    static getSession({ context: { state } }: JWTAction) {
-        return state instanceof JsonWebTokenError
-            ? console.error(state)
-            : state.user;
+    static getAuthingUser(token: string) {
+        return verify(
+            token.split(/\s+/)[1],
+            AUTHING_APP_SECRET
+        ) as AuthingSession;
+    }
+
+    static async getSession(
+        { context: { state, request } }: JWTAction,
+        roles: Role[] = []
+    ): Promise<UserOutput> {
+        if (!(state instanceof JsonWebTokenError)) return state.user;
+
+        const { phone_number } = this.getAuthingUser(
+            request.get('Authorization')
+        );
+        const user = await dataSource
+            .getRepository(User)
+            .findOne({ where: { mobilePhone: phone_number } });
+
+        if (!user) throw new UnauthorizedError();
+
+        if (!intersection(roles, user.roles).length) throw new ForbiddenError();
+
+        return user;
+    }
+
+    async register(data: Partial<Omit<UserOutput, 'createdAt' | 'updatedAt'>>) {
+        const sum = await this.store.count();
+
+        const { password, ...user } = await this.store.save({
+            roles: [!data.id && !sum ? Role.Root : Role.Client],
+            ...data,
+            password: UserController.encrypt(data.password || uniqueID())
+        });
+        return user;
     }
 
     @Get('/session')
@@ -49,6 +90,27 @@ export class UserController {
     @ResponseSchema(UserOutput)
     getSession(@CurrentUser() user: UserOutput) {
         return user;
+    }
+
+    @Post('/session/authing')
+    @ResponseSchema(UserOutput)
+    async signInAuthing(
+        @HeaderParam('Authorization', { required: true }) token: string
+    ) {
+        const {
+            phone_number: mobilePhone,
+            nickname,
+            picture
+        } = UserController.getAuthingUser(token);
+
+        const user = await this.store.findOne({ where: { mobilePhone } });
+
+        return this.register({
+            id: user?.id,
+            mobilePhone,
+            nickName: nickname,
+            avatar: picture
+        });
     }
 
     @Post('/session')
@@ -69,16 +131,8 @@ export class UserController {
 
     @Post()
     @ResponseSchema(UserOutput)
-    async signUp(@Body() data: SignInData) {
-        const sum = await this.store.count();
-
-        const { password, ...user } = await this.store.save(
-            Object.assign(new User(), data, {
-                password: UserController.encrypt(data.password),
-                roles: [sum ? Role.Client : Role.Root]
-            })
-        );
-        return user;
+    signUp(@Body() data: SignInData) {
+        return this.register(data);
     }
 
     @Put('/:id')

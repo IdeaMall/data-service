@@ -9,8 +9,8 @@ on:
             - v*
 env:
     ARTIFACT_PATH: /tmp/artifact.tar
-    BOX_NAME: rest-node-ts
-    BOX_URL: idea2app/rest-node-ts
+    BOX_NAME: data-service
+    BOX_URL: ideamall/data-service
     HOST: ${{ secrets.HOST }}
 
 jobs:
