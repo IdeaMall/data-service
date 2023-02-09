@@ -5,9 +5,8 @@ import {
     UserListChunk,
     UserOutput
 } from '@ideamall/data-model';
-import { AuthenticationClient } from 'authing-js-sdk';
 import { createHash } from 'crypto';
-import { JsonWebTokenError, sign } from 'jsonwebtoken';
+import { JsonWebTokenError, sign, verify } from 'jsonwebtoken';
 import { intersection } from 'lodash';
 import {
     Authorized,
@@ -27,10 +26,16 @@ import {
     UnauthorizedError
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
+import { uniqueID } from 'web-utility';
 
-import dataSource, { JWTAction, SignInData, User } from '../model';
+import dataSource, {
+    AuthingSession,
+    JWTAction,
+    SignInData,
+    User
+} from '../model';
 
-const { APP_SECRET, AUTHING_APP_HOST, AUTHING_APP_ID } = process.env;
+const { APP_SECRET, AUTHING_APP_SECRET } = process.env;
 
 @JsonController('/user')
 export class UserController {
@@ -42,19 +47,11 @@ export class UserController {
             .digest('hex');
     }
 
-    static async getAuthingUser(token: string) {
-        var [type, token] = token.split(/\s+/);
-
-        const authing = new AuthenticationClient({
-            appHost: AUTHING_APP_HOST,
-            appId: AUTHING_APP_ID,
-            token
-        });
-        const user = await authing.getCurrentUser();
-
-        if (!user) throw new UnauthorizedError();
-
-        return user;
+    static getAuthingUser(token: string) {
+        return verify(
+            token.split(/\s+/)[1],
+            AUTHING_APP_SECRET
+        ) as AuthingSession;
     }
 
     static async getSession(
@@ -63,17 +60,28 @@ export class UserController {
     ): Promise<UserOutput> {
         if (!(state instanceof JsonWebTokenError)) return state.user;
 
-        const authingUser = await this.getAuthingUser(
+        const { phone_number } = this.getAuthingUser(
             request.get('Authorization')
         );
         const user = await dataSource
             .getRepository(User)
-            .findOne({ where: { mobilePhone: authingUser.phone } });
+            .findOne({ where: { mobilePhone: phone_number } });
 
         if (!user) throw new UnauthorizedError();
 
         if (!intersection(roles, user.roles).length) throw new ForbiddenError();
 
+        return user;
+    }
+
+    async register(data: Partial<Omit<UserOutput, 'createdAt' | 'updatedAt'>>) {
+        const sum = await this.store.count();
+
+        const { password, ...user } = await this.store.save({
+            roles: [!data.id && !sum ? Role.Root : Role.Client],
+            ...data,
+            password: UserController.encrypt(data.password || uniqueID())
+        });
         return user;
     }
 
@@ -86,13 +94,23 @@ export class UserController {
 
     @Post('/session/authing')
     @ResponseSchema(UserOutput)
-    async signInAuthing(@HeaderParam('Authorization') token: string) {
-        const { phone } = await UserController.getAuthingUser(token);
+    async signInAuthing(
+        @HeaderParam('Authorization', { required: true }) token: string
+    ) {
+        const {
+            phone_number: mobilePhone,
+            nickname,
+            picture
+        } = UserController.getAuthingUser(token);
 
-        const user = await this.store.findOne({
-            where: { mobilePhone: phone }
+        const user = await this.store.findOne({ where: { mobilePhone } });
+
+        return this.register({
+            id: user?.id,
+            mobilePhone,
+            nickName: nickname,
+            avatar: picture
         });
-        return this.store.save({ id: user?.id, mobilePhone: phone });
     }
 
     @Post('/session')
@@ -113,16 +131,8 @@ export class UserController {
 
     @Post()
     @ResponseSchema(UserOutput)
-    async signUp(@Body() data: SignInData) {
-        const sum = await this.store.count();
-
-        const { password, ...user } = await this.store.save(
-            Object.assign(new User(), data, {
-                password: UserController.encrypt(data.password),
-                roles: [sum ? Role.Client : Role.Root]
-            })
-        );
-        return user;
+    signUp(@Body() data: SignInData) {
+        return this.register(data);
     }
 
     @Put('/:id')

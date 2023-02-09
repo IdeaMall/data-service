@@ -17,12 +17,11 @@
 
 ## Environment variables
 
-|        Name        |            Usage             |
-| :----------------: | :--------------------------: |
-|    `APP_SECRET`    |   encrypt Password & Token   |
-|   `DATABASE_URL`   | PostgreSQL connection string |
-| `AUTHING_APP_HOST` |  Host URL of Authing.cn App  |
-|  `AUTHING_APP_ID`  |     ID of Authing.cn App     |
+|         Name         |            Usage             |
+| :------------------: | :--------------------------: |
+|     `APP_SECRET`     |   encrypt Password & Token   |
+|    `DATABASE_URL`    | PostgreSQL connection string |
+| `AUTHING_APP_SECRET` | Secret Key of Authing.cn App |
 
 ## Usage
 
