@@ -6,8 +6,10 @@ import { User } from './User';
 import { Address } from './Address';
 import { Category } from './Category';
 import { Goods } from './Goods';
+import { GoodsItem } from './GoodsItem';
 import { Favorite } from './Favorite';
 import { Order } from './Order';
+import { Parcel } from './Parcel';
 import { Comment } from './Comment';
 
 export * from './Base';
@@ -15,8 +17,10 @@ export * from './User';
 export * from './Address';
 export * from './Category';
 export * from './Goods';
+export * from './GoodsItem';
 export * from './Favorite';
 export * from './Order';
+export * from './Parcel';
 export * from './Comment';
 
 const { NODE_ENV, DATABASE_URL } = process.env;
@@ -32,7 +36,17 @@ const commonOptions: Pick<
     'synchronize' | 'entities' | 'migrations'
 > = {
     synchronize: true,
-    entities: [User, Address, Category, Goods, Favorite, Order, Comment],
+    entities: [
+        User,
+        Address,
+        Category,
+        Goods,
+        GoodsItem,
+        Favorite,
+        Order,
+        Parcel,
+        Comment
+    ],
     migrations: [`${isProduct ? '.data' : 'migration'}/*.ts`]
 };
 

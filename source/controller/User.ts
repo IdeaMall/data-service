@@ -22,8 +22,7 @@ import {
     Param,
     Post,
     Put,
-    QueryParams,
-    UnauthorizedError
+    QueryParams
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
 import { uniqueID } from 'web-utility';
@@ -35,7 +34,7 @@ import dataSource, {
     User
 } from '../model';
 
-const { APP_SECRET, AUTHING_APP_SECRET } = process.env;
+const { AUTHING_APP_SECRET } = process.env;
 
 @JsonController('/user')
 export class UserController {
@@ -43,7 +42,7 @@ export class UserController {
 
     static encrypt(raw: string) {
         return createHash('sha1')
-            .update(APP_SECRET + raw)
+            .update(AUTHING_APP_SECRET + raw)
             .digest('hex');
     }
 
@@ -55,34 +54,42 @@ export class UserController {
     }
 
     static async getSession(
-        { context: { state, request } }: JWTAction,
+        { context: { state } }: JWTAction,
         roles: Role[] = []
-    ): Promise<UserOutput> {
-        if (!(state instanceof JsonWebTokenError)) return state.user;
+    ) {
+        if (state instanceof JsonWebTokenError) return console.error(state);
 
-        const { phone_number } = this.getAuthingUser(
-            request.get('Authorization')
-        );
-        const user = await dataSource
+        const { user } = state;
+
+        if (!('userpool_id' in user)) return user;
+
+        const session = await dataSource
             .getRepository(User)
-            .findOne({ where: { mobilePhone: phone_number } });
+            .findOne({ where: { mobilePhone: user.phone_number } });
 
-        if (!user) throw new UnauthorizedError();
+        if (!session) return;
 
-        if (!intersection(roles, user.roles).length) throw new ForbiddenError();
+        if (!intersection(roles, session.roles).length)
+            throw new ForbiddenError();
 
-        return user;
+        return session;
     }
 
-    async register(data: Partial<Omit<UserOutput, 'createdAt' | 'updatedAt'>>) {
+    async register(
+        data: Partial<Omit<UserInput & UserOutput, 'createdAt' | 'updatedAt'>>
+    ) {
         const sum = await this.store.count();
 
         const { password, ...user } = await this.store.save({
-            roles: [!data.id && !sum ? Role.Root : Role.Client],
+            roles: [!data.id && !sum ? Role.Administrator : Role.Client],
             ...data,
             password: UserController.encrypt(data.password || uniqueID())
         });
-        return user;
+        return user as UserOutput;
+    }
+
+    signToken(user: UserOutput) {
+        return { ...user, token: sign({ ...user }, AUTHING_APP_SECRET) };
     }
 
     @Get('/session')
@@ -103,14 +110,15 @@ export class UserController {
             picture
         } = UserController.getAuthingUser(token);
 
-        const user = await this.store.findOne({ where: { mobilePhone } });
+        const existed = await this.store.findOne({ where: { mobilePhone } });
 
-        return this.register({
-            id: user?.id,
+        const registered = await this.register({
+            id: existed?.id,
             mobilePhone,
             nickName: nickname,
             avatar: picture
         });
+        return this.signToken(registered);
     }
 
     @Post('/session')
@@ -126,7 +134,7 @@ export class UserController {
         });
         if (!user) throw new ForbiddenError();
 
-        return { ...user, token: sign({ ...user }, APP_SECRET) };
+        return this.signToken(user);
     }
 
     @Post()
@@ -143,7 +151,8 @@ export class UserController {
         @CurrentUser() { id: ID, roles }: User,
         @Body() data: UserInput
     ) {
-        if (!roles.includes(Role.Root) && id !== ID) throw new ForbiddenError();
+        if (!roles.includes(Role.Administrator) && id !== ID)
+            throw new ForbiddenError();
 
         return this.store.save({ ...data, id });
     }
@@ -162,7 +171,8 @@ export class UserController {
         @Param('id') id: number,
         @CurrentUser() { id: ID, roles }: User
     ) {
-        if (!roles.includes(Role.Root) && id !== ID) throw new ForbiddenError();
+        if (!roles.includes(Role.Administrator) && id !== ID)
+            throw new ForbiddenError();
 
         await this.store.delete(id);
     }

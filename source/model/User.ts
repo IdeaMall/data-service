@@ -1,4 +1,10 @@
-import { Gender, Role, UserBaseModel, UserOutput } from '@ideamall/data-model';
+import {
+    Gender,
+    Role,
+    UserBaseOutput,
+    UserInput,
+    UserOutput
+} from '@ideamall/data-model';
 import { IsPhoneNumber, IsString } from 'class-validator';
 import { JsonWebTokenError } from 'jsonwebtoken';
 import { ParameterizedContext } from 'koa';
@@ -7,7 +13,7 @@ import { Column, Entity, ManyToOne } from 'typeorm';
 import { Base } from './Base';
 
 export class SignInData
-    implements Required<Pick<UserOutput, 'mobilePhone' | 'password'>>
+    implements Required<Pick<UserInput, 'mobilePhone' | 'password'>>
 {
     @IsPhoneNumber()
     mobilePhone: string;
@@ -17,11 +23,13 @@ export class SignInData
 }
 
 export interface JWTAction {
-    context?: ParameterizedContext<JsonWebTokenError | { user: UserOutput }>;
+    context?: ParameterizedContext<
+        JsonWebTokenError | { user: User | AuthingSession }
+    >;
 }
 
 @Entity()
-export class User extends Base implements UserOutput {
+export class User extends Base implements UserInput, UserOutput {
     @Column({ unique: true })
     mobilePhone: string;
 
@@ -41,7 +49,7 @@ export class User extends Base implements UserOutput {
     roles: Role[];
 }
 
-export abstract class UserBase extends Base implements UserBaseModel {
+export abstract class UserBase extends Base implements UserBaseOutput {
     @ManyToOne(() => User)
     createdBy: User;
 
