@@ -14,12 +14,12 @@ export * from './User';
 export const { swagger, mocker, router } = createAPI({
     mock: !isProduct,
     controllers: [
-        UserController,
-        AddressController,
-        CategoryController,
-        GoodsController,
-        FavoriteController,
-        OrderController,
-        CommentController
+        UserController
+        // AddressController,
+        // CategoryController,
+        // GoodsController,
+        // FavoriteController,
+        // OrderController,
+        // CommentController
     ]
 });

@@ -32,6 +32,12 @@ export class Address extends UserBase implements AddressOutput {
     @Column({ nullable: true })
     room?: string;
 
+    @Column({ nullable: true })
+    zipCode?: string;
+
     @Column()
     consignee: string;
+
+    @Column()
+    mobilePhone: string;
 }

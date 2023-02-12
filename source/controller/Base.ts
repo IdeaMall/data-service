@@ -12,11 +12,11 @@ import {
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
 import { Repository } from 'typeorm';
-import { BaseModel } from '@ideamall/data-model';
+import { BaseOutput } from '@ideamall/data-model';
 
 import dataSource, { Base } from '../model';
 
-export function Controller<M extends BaseModel, E extends Base>(
+export function Controller<M extends BaseOutput, E extends Base>(
     rootPath: `/${string}`,
     Model: Constructor<M>,
     Entity: Constructor<E>

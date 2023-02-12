@@ -9,13 +9,13 @@ import { useKoaServer } from 'routing-controllers';
 import { swagger, mocker, router, UserController } from './controller';
 import dataSource, { isProduct } from './model';
 
-const { PORT = 8080, APP_SECRET } = process.env;
+const { PORT = 8080, AUTHING_APP_SECRET } = process.env;
 
 const HOST = `http://localhost:${PORT}`,
     app = new Koa()
         .use(KoaLogger())
         .use(swagger({ exposeSpec: true }))
-        .use(jwt({ secret: APP_SECRET, passthrough: true }));
+        .use(jwt({ secret: AUTHING_APP_SECRET, passthrough: true }));
 
 if (!isProduct) app.use(mocker());
 
