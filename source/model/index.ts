@@ -13,6 +13,7 @@ import { Parcel } from './Parcel';
 import { Comment } from './Comment';
 
 export * from './Base';
+export * from './File';
 export * from './User';
 export * from './Address';
 export * from './Category';
