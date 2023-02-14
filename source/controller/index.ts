@@ -5,24 +5,27 @@ import { AddressController } from './Address';
 import { CategoryController } from './Category';
 import { CommentController } from './Comment';
 import { FavoriteController } from './Favorite';
+import { FileController } from './File';
 import { GoodsController } from './Goods';
 import { OrderController } from './Order';
 import { StatisticController } from './Statistic';
 import { UserController } from './User';
 
 export * from './Statistic';
+export * from './File';
 export * from './User';
 
 export const { swagger, mocker, router } = createAPI({
     mock: !isProduct,
     controllers: [
-        UserController,
+        StatisticController,
+        FileController,
+        UserController
         // AddressController,
         // CategoryController,
         // GoodsController,
         // FavoriteController,
         // OrderController,
         // CommentController
-        StatisticController
     ]
 });

@@ -69,7 +69,7 @@ export class UserController {
 
         if (!session) return;
 
-        if (!intersection(roles, session.roles).length)
+        if (roles.length && !intersection(roles, session.roles).length)
             throw new ForbiddenError();
 
         return session;
@@ -80,12 +80,12 @@ export class UserController {
     ) {
         const sum = await this.store.count();
 
-        const { password, ...user } = await this.store.save({
+        const { id } = await this.store.save({
             roles: [!data.id && !sum ? Role.Administrator : Role.Client],
             ...data,
             password: UserController.encrypt(data.password || uniqueID())
         });
-        return user as UserOutput;
+        return this.store.findOne({ where: { id } });
     }
 
     signToken(user: UserOutput) {
