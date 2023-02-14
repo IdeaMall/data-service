@@ -1,7 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@ideamall/data-model': 1.0.0-beta.2
+  '@ideamall/data-model': 1.0.0-beta.5
   '@koa/cors': ^4.0.0
   '@koa/multer': ^3.0.2
   '@koa/router': ^12.0.0
@@ -39,7 +39,7 @@ specifiers:
   web-utility: ^4.0.0
 
 dependencies:
-  '@ideamall/data-model': 1.0.0-beta.2_typescript@4.9.5
+  '@ideamall/data-model': 1.0.0-beta.5_typescript@4.9.5
   '@koa/cors': 4.0.0
   '@koa/multer': 3.0.2
   '@koa/router': 12.0.0
@@ -340,8 +340,8 @@ packages:
     resolution: {integrity: sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==}
     optional: true
 
-  /@ideamall/data-model/1.0.0-beta.2_typescript@4.9.5:
-    resolution: {integrity: sha512-DRcqnI0zIbr70SU89DQwgxNE8HUBn1fjDwLj5emt9ABEzT4W5treBF2XQzYPhDcgPkS9sOhj+3pCIx/sEz0ayw==, tarball: download/@ideamall/data-model/1.0.0-beta.2/480049ebb9ff7e0e636a99b6ba759d770a53bb83}
+  /@ideamall/data-model/1.0.0-beta.5_typescript@4.9.5:
+    resolution: {integrity: sha512-T70dBORmpx+IM57AE//8J0yjAKGsO3dwKfU/pFqyN+uK6aVfKcmb4kQ9A2xXI/Bct0DRE7uTrZXaOrS9GMcZNA==, tarball: download/@ideamall/data-model/1.0.0-beta.5/d5b5ba3851bc3488b990e25267da1d8b2e4ad5e4}
     dependencies:
       class-transformer: 0.5.1
       class-validator: 0.14.0

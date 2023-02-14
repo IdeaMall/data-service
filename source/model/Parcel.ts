@@ -6,7 +6,6 @@ import { Order } from './Order';
 import { UserBase } from './User';
 
 @Entity()
-// @ts-ignore
 export class Parcel extends UserBase implements ParcelOutput {
     @ManyToOne(() => Order)
     order: Order;

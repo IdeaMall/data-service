@@ -113,7 +113,7 @@ export class UserController {
         const existed = await this.store.findOne({ where: { mobilePhone } });
 
         const registered = await this.register({
-            id: existed?.id,
+            ...existed,
             mobilePhone,
             nickName: nickname,
             avatar: picture
