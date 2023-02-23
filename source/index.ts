@@ -6,7 +6,7 @@ import KoaLogger from 'koa-logger';
 import jwt from 'koa-jwt';
 import { useKoaServer } from 'routing-controllers';
 
-import { swagger, mocker, router, UserController } from './controller';
+import { mocker, router, SessionController, swagger } from './controller';
 import dataSource, { isProduct } from './model';
 
 const { PORT = 8080, AUTHING_APP_SECRET } = process.env;
@@ -23,8 +23,8 @@ useKoaServer(app, {
     ...router,
     cors: true,
     authorizationChecker: async (action, roles) =>
-        !!(await UserController.getSession(action, roles)),
-    currentUserChecker: UserController.getSession
+        !!(await SessionController.getSession(action, roles)),
+    currentUserChecker: SessionController.getSession
 });
 
 console.time('Server boot');

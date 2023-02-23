@@ -6,8 +6,6 @@ import {
     UserOutput
 } from '@ideamall/data-model';
 import { createHash } from 'crypto';
-import { JsonWebTokenError, sign, verify } from 'jsonwebtoken';
-import { intersection } from 'lodash';
 import {
     Authorized,
     Body,
@@ -15,7 +13,6 @@ import {
     Delete,
     ForbiddenError,
     Get,
-    HeaderParam,
     JsonController,
     OnNull,
     OnUndefined,
@@ -25,14 +22,10 @@ import {
     QueryParams
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
+import { Repository } from 'typeorm';
 import { uniqueID } from 'web-utility';
 
-import dataSource, {
-    AuthingSession,
-    JWTAction,
-    SignInData,
-    User
-} from '../model';
+import dataSource, { SignInData, User } from '../model';
 
 const { AUTHING_APP_SECRET } = process.env;
 
@@ -46,101 +39,24 @@ export class UserController {
             .digest('hex');
     }
 
-    static getAuthingUser(token: string) {
-        return verify(
-            token.split(/\s+/)[1],
-            AUTHING_APP_SECRET
-        ) as AuthingSession;
-    }
-
-    static async getSession(
-        { context: { state } }: JWTAction,
-        roles: Role[] = []
-    ) {
-        if (state instanceof JsonWebTokenError) return console.error(state);
-
-        const { user } = state;
-
-        if (!('userpool_id' in user)) return user;
-
-        const session = await dataSource
-            .getRepository(User)
-            .findOne({ where: { mobilePhone: user.phone_number } });
-
-        if (!session) return;
-
-        if (roles.length && !intersection(roles, session.roles).length)
-            throw new ForbiddenError();
-
-        return session;
-    }
-
-    async register(
+    static async register(
+        store: Repository<User>,
         data: Partial<Omit<UserInput & UserOutput, 'createdAt' | 'updatedAt'>>
     ) {
-        const sum = await this.store.count();
+        const sum = await store.count();
 
-        const { id } = await this.store.save({
+        const { id } = await store.save({
             roles: [!data.id && !sum ? Role.Administrator : Role.Client],
             ...data,
             password: UserController.encrypt(data.password || uniqueID())
         });
-        return this.store.findOne({ where: { id } });
-    }
-
-    signToken(user: UserOutput) {
-        return { ...user, token: sign({ ...user }, AUTHING_APP_SECRET) };
-    }
-
-    @Get('/session')
-    @Authorized()
-    @ResponseSchema(UserOutput)
-    getSession(@CurrentUser() user: UserOutput) {
-        return user;
-    }
-
-    @Post('/session/authing')
-    @ResponseSchema(UserOutput)
-    async signInAuthing(
-        @HeaderParam('Authorization', { required: true }) token: string
-    ) {
-        const {
-            phone_number: mobilePhone,
-            nickname,
-            picture
-        } = UserController.getAuthingUser(token);
-
-        const existed = await this.store.findOne({ where: { mobilePhone } });
-
-        const registered = await this.register({
-            ...existed,
-            mobilePhone,
-            nickName: nickname,
-            avatar: picture
-        });
-        return this.signToken(registered);
-    }
-
-    @Post('/session')
-    @ResponseSchema(UserOutput)
-    async signIn(
-        @Body() { mobilePhone, password }: SignInData
-    ): Promise<UserOutput> {
-        const user = await this.store.findOne({
-            where: {
-                mobilePhone,
-                password: UserController.encrypt(password)
-            }
-        });
-        if (!user) throw new ForbiddenError();
-
-        return this.signToken(user);
+        return store.findOne({ where: { id } });
     }
 
     @Post()
     @ResponseSchema(UserOutput)
     signUp(@Body() data: SignInData) {
-        return this.register(data);
+        return UserController.register(this.store, data);
     }
 
     @Put('/:id')
