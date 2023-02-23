@@ -14,15 +14,16 @@ import { UserController } from './User';
 export * from './Statistic';
 export * from './File';
 export * from './User';
+export * from './Category';
 
 export const { swagger, mocker, router } = createAPI({
     mock: !isProduct,
     controllers: [
         StatisticController,
         FileController,
-        UserController
+        UserController,
         // AddressController,
-        // CategoryController,
+        CategoryController
         // GoodsController,
         // FavoriteController,
         // OrderController,

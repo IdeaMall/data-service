@@ -6,7 +6,7 @@ import {
     UserOutput
 } from '@ideamall/data-model';
 import { IsPhoneNumber, IsString } from 'class-validator';
-import { JsonWebTokenError } from 'jsonwebtoken';
+import { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import { ParameterizedContext } from 'koa';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
@@ -70,11 +70,9 @@ export type AuthingUser = Record<
     >;
 
 export interface AuthingSession
-    extends Pick<AuthingUser, 'username' | 'unionid'>,
-        Record<
-            'userpool_id' | 'iss' | 'sub' | 'aud' | 'gender' | 'picture',
-            string
-        >,
+    extends JwtPayload,
+        Pick<AuthingUser, 'username' | 'unionid'>,
+        Record<'userpool_id' | 'gender' | 'picture', string>,
         Partial<
             Record<
                 | 'external_id'
@@ -101,6 +99,4 @@ export interface AuthingSession
     address: AuthingAddress;
 
     updated_at: Date;
-    exp: number;
-    iat: number;
 }
