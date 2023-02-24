@@ -1,10 +1,13 @@
-import { AddressOutput } from '@ideamall/data-model';
+import { AddressOutput, AddressOwner } from '@ideamall/data-model';
 import { Column, Entity } from 'typeorm';
 
 import { UserBase } from './User';
 
 @Entity()
 export class Address extends UserBase implements AddressOutput {
+    @Column({ enum: AddressOwner })
+    ownership: AddressOwner;
+
     @Column()
     country: string;
 
@@ -36,7 +39,7 @@ export class Address extends UserBase implements AddressOutput {
     zipCode?: string;
 
     @Column()
-    consignee: string;
+    signature: string;
 
     @Column()
     mobilePhone: string;

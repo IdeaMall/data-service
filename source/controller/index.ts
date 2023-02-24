@@ -1,7 +1,7 @@
 import { createAPI } from 'koagger';
 
 import { isProduct } from '../model';
-import { AddressController } from './Address';
+import { BuyerAddressController, SellerAddressController } from './Address';
 import { CategoryController } from './Category';
 import { CommentController } from './Comment';
 import { FavoriteController } from './Favorite';
@@ -18,18 +18,20 @@ export * from './User';
 export * from './Session';
 export * from './Address';
 export * from './Category';
+export * from './Goods';
 
 export const { swagger, mocker, router } = createAPI({
     mock: !isProduct,
     controllers: [
         StatisticController,
         FileController,
-        AddressController,
+        BuyerAddressController,
         SessionController,
         UserController,
         // AddressController,
-        CategoryController
-        // GoodsController,
+        CategoryController,
+        SellerAddressController,
+        GoodsController
         // FavoriteController,
         // OrderController,
         // CommentController
