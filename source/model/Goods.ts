@@ -1,4 +1,4 @@
-import { GoodsOutput } from '@ideamall/data-model';
+import { GoodsOutput, GoodsStyle } from '@ideamall/data-model';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 import { Address } from './Address';
@@ -17,11 +17,8 @@ export class Goods extends UserBase implements GoodsOutput {
     @ManyToOne(() => Category)
     category: Category;
 
-    @Column({ nullable: true })
-    styleName?: string;
-
-    @Column({ type: 'simple-array', nullable: true })
-    styleValues?: string[];
+    @Column({ type: 'simple-json', nullable: true })
+    styles?: GoodsStyle[];
 
     @OneToMany(() => GoodsItem, ({ goods }) => goods)
     items: GoodsItem[];

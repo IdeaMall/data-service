@@ -112,8 +112,10 @@ export class GoodsController {
 
         goods.category = Object.assign(new Category(), { id: category });
 
-        goods.items = items.map(id => Object.assign(new GoodsItem(), { id }));
-
+        if (items)
+            goods.items = items.map(id =>
+                Object.assign(new GoodsItem(), { id })
+            );
         goods.store = Object.assign(new Address(), { id: store });
 
         return this.goodsStore.save(Object.assign(goods, data));
@@ -132,7 +134,7 @@ export class GoodsController {
             id,
             updatedBy: user,
             category: Object.assign(new Category(), { id: category }),
-            items: items.map(id => Object.assign(new GoodsItem(), { id })),
+            items: items?.map(id => Object.assign(new GoodsItem(), { id })),
             store: Object.assign(new Address(), { id: store })
         });
     }
@@ -141,7 +143,10 @@ export class GoodsController {
     @OnNull(404)
     @ResponseSchema(GoodsOutput)
     getOne(@Param('id') id: number) {
-        return this.goodsStore.findOne({ where: { id } });
+        return this.goodsStore.findOne({
+            where: { id },
+            relations: ['category', 'store']
+        });
     }
 
     @Delete('/:id')
@@ -161,6 +166,7 @@ export class GoodsController {
                 category: category && { id: category },
                 store: store && { id: store }
             },
+            relations: ['category', 'store'],
             skip: pageSize * (pageIndex - 1),
             take: pageSize
         });

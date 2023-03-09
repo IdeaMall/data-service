@@ -24,8 +24,8 @@ export class GoodsItem extends UserBase implements GoodsItemOutput {
     @Column({ nullable: true })
     code?: string;
 
-    @Column({ type: 'simple-array', nullable: true })
-    styles?: string[];
+    @Column({ type: 'simple-json', nullable: true })
+    styles?: Record<string, string>;
 
     @Column()
     stock: number;

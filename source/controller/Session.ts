@@ -27,11 +27,16 @@ const { AUTHING_APP_SECRET } = process.env;
 export class SessionController {
     store = dataSource.getRepository(User);
 
-    static getAuthingUser(token: string) {
-        return verify(
+    static getAuthingUser(token: string): AuthingSession {
+        var { phone_number, ...session } = verify(
             token.split(/\s+/)[1],
             AUTHING_APP_SECRET
         ) as AuthingSession;
+
+        if (phone_number && !phone_number.startsWith('+86'))
+            phone_number = '+86' + phone_number;
+
+        return { ...session, phone_number };
     }
 
     static async getSession(
