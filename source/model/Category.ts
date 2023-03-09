@@ -9,5 +9,8 @@ export class Category extends UserBase implements CategoryOutput {
     name: string;
 
     @Column({ nullable: true })
+    image?: string;
+
+    @Column({ nullable: true })
     parentId?: number;
 }

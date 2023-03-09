@@ -8,6 +8,7 @@ import {
 import {
     Authorized,
     Body,
+    CurrentUser,
     Delete,
     Get,
     JsonController,
@@ -20,7 +21,7 @@ import {
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
 
-import dataSource, { Category } from '../model';
+import dataSource, { Category, User } from '../model';
 
 @JsonController('/category')
 export class CategoryController {
@@ -29,15 +30,23 @@ export class CategoryController {
     @Post()
     @Authorized([Role.Administrator, Role.Manager])
     @ResponseSchema(CategoryOutput)
-    createOne(@Body() data: CategoryInput) {
-        return this.store.save(Object.assign(new Category(), data));
+    createOne(@CurrentUser() user: User, @Body() data: CategoryInput) {
+        const category = new Category();
+
+        category.createdBy = user;
+
+        return this.store.save(Object.assign(category, data));
     }
 
     @Put('/:id')
     @Authorized([Role.Administrator, Role.Manager])
     @ResponseSchema(CategoryOutput)
-    updateOne(@Param('id') id: number, @Body() data: CategoryInput) {
-        return this.store.save({ ...data, id });
+    updateOne(
+        @Param('id') id: number,
+        @CurrentUser() user: User,
+        @Body() data: CategoryInput
+    ) {
+        return this.store.save({ ...data, id, updatedBy: user });
     }
 
     @Get('/:id')
@@ -56,8 +65,11 @@ export class CategoryController {
 
     @Get()
     @ResponseSchema(CategoryListChunk)
-    async getList(@QueryParams() { pageSize, pageIndex }: CategoryFilter) {
+    async getList(
+        @QueryParams() { parentId, pageSize, pageIndex }: CategoryFilter
+    ) {
         const [list, count] = await this.store.findAndCount({
+            where: parentId && { parentId },
             skip: pageSize * (pageIndex - 1),
             take: pageSize
         });

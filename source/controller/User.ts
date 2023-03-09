@@ -62,15 +62,23 @@ export class UserController {
     @Put('/:id')
     @Authorized()
     @ResponseSchema(UserOutput)
-    updateOne(
+    async updateOne(
         @Param('id') id: number,
-        @CurrentUser() { id: ID, roles }: User,
-        @Body() data: UserInput
+        @CurrentUser() session: User,
+        @Body() { roles, ...data }: UserInput
     ) {
-        if (!roles.includes(Role.Administrator) && id !== ID)
+        if (!roles?.length) {
+            if (id !== session.id) throw new ForbiddenError();
+
+            return this.store.save({ ...data, id });
+        }
+
+        if (!session.roles?.includes(Role.Administrator))
             throw new ForbiddenError();
 
-        return this.store.save({ ...data, id });
+        await this.store.save({ id, roles });
+
+        return { ...data, roles };
     }
 
     @Get('/:id')
