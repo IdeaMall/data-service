@@ -15,6 +15,8 @@ import { FileOutput, supabase, User } from '../model';
 
 @JsonController('/file')
 export class FileController {
+    storage = supabase.storage.from(process.env.SUPABASE_FILE_BUCKET);
+
     @Post()
     @Authorized()
     @ResponseSchema(FileOutput)
@@ -26,12 +28,14 @@ export class FileController {
 
         const path = `${mobilePhone}/${originalname || `${uniqueID()}.${ext}`}`;
 
-        const { error, data } = await supabase.storage
-            .from(process.env.SUPABASE_FILE_BUCKET)
-            .upload(path, buffer, { contentType: mime, upsert: true });
+        const { error } = await this.storage.upload(path, buffer, {
+            contentType: mime
+        });
 
         if (error) throw new BadRequestError(error.message);
 
-        return data;
+        const { publicUrl } = this.storage.getPublicUrl(path).data;
+
+        return { path: publicUrl };
     }
 }
