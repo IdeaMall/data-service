@@ -1,19 +1,37 @@
+import { Type } from 'class-transformer';
 import {
-    Gender,
-    Role,
-    UserBaseOutput,
-    UserInput,
-    UserOutput
-} from '@ideamall/data-model';
-import { IsPhoneNumber, IsString } from 'class-validator';
+    IsEnum,
+    IsInt,
+    IsMobilePhone,
+    IsOptional,
+    IsPhoneNumber,
+    IsString,
+    IsStrongPassword,
+    IsUrl,
+    Min,
+    ValidateNested
+} from 'class-validator';
 import { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
 import { ParameterizedContext } from 'koa';
+import { NewData } from 'mobx-restful';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
-import { Base } from './Base';
+import { Base, BaseFilter, InputData, ListChunk } from './Base';
+
+export enum Gender {
+    Female = 0,
+    Male = 1,
+    Other = 2
+}
+
+export enum Role {
+    Administrator = 0,
+    Manager = 1,
+    Client = 2
+}
 
 export class SignInData
-    implements Required<Pick<UserInput, 'mobilePhone' | 'password'>>
+    implements Required<Pick<User, 'mobilePhone' | 'password'>>
 {
     @IsPhoneNumber()
     mobilePhone: string;
@@ -29,32 +47,76 @@ export interface JWTAction {
 }
 
 @Entity()
-export class User extends Base implements UserInput, UserOutput {
+export class User extends Base {
+    @IsMobilePhone()
     @Column({ unique: true })
     mobilePhone: string;
 
+    @IsString()
+    @IsOptional()
     @Column({ nullable: true })
     nickName?: string;
 
+    @IsEnum(Gender)
+    @IsOptional()
     @Column({ enum: Gender, nullable: true })
     gender?: Gender;
 
+    @IsUrl()
+    @IsOptional()
     @Column({ nullable: true })
     avatar?: string;
 
+    @IsStrongPassword()
     @Column({ select: false })
     password: string;
 
+    @IsEnum(Role, { each: true })
+    @IsOptional()
     @Column('simple-json')
-    roles: Role[];
+    roles?: Role[];
+
+    @IsString()
+    @IsOptional()
+    token?: string;
 }
 
-export abstract class UserBase extends Base implements UserBaseOutput {
+export abstract class UserBase extends Base {
+    @Type(() => User)
+    @ValidateNested()
     @ManyToOne(() => User)
     createdBy: User;
 
+    @Type(() => User)
+    @ValidateNested()
     @ManyToOne(() => User)
     updatedBy: User;
+}
+
+export type UserInputData<T> = NewData<Omit<T, keyof UserBase>, UserBase>;
+
+export class UserFilter extends BaseFilter implements Partial<InputData<User>> {
+    @IsMobilePhone()
+    @IsOptional()
+    mobilePhone?: string;
+
+    @IsString()
+    @IsOptional()
+    nickName?: string;
+
+    @IsEnum(Gender)
+    @IsOptional()
+    gender?: Gender;
+}
+
+export class UserListChunk implements ListChunk<User> {
+    @IsInt()
+    @Min(0)
+    count: number;
+
+    @Type(() => User)
+    @ValidateNested({ each: true })
+    list: User[];
 }
 
 export type AuthingAddress = Partial<

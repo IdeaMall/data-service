@@ -1,16 +1,4 @@
 import {
-    BaseFilter,
-    GoodsFilter,
-    GoodsInput,
-    GoodsItemFilter,
-    GoodsItemInput,
-    GoodsItemListChunk,
-    GoodsItemOutput,
-    GoodsListChunk,
-    GoodsOutput,
-    Role
-} from '@ideamall/data-model';
-import {
     Authorized,
     Body,
     CurrentUser,
@@ -26,12 +14,18 @@ import {
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
 
-import dataSource, {
+import {
     Address,
     Category,
     Goods,
+    GoodsFilter,
     GoodsItem,
-    User
+    GoodsItemFilter,
+    GoodsItemListChunk,
+    GoodsListChunk,
+    Role,
+    User,
+    dataSource
 } from '../model';
 
 @JsonController('/goods')
@@ -41,11 +35,11 @@ export class GoodsController {
 
     @Post('/:id/item')
     @Authorized([Role.Administrator, Role.Manager])
-    @ResponseSchema(GoodsItemOutput)
+    @ResponseSchema(GoodsItem)
     createOneItem(
         @Param('id') id: number,
         @CurrentUser() user: User,
-        @Body() { goods, ...data }: GoodsItemInput
+        @Body() { goods, ...data }: GoodsItem
     ) {
         const goodsItem = new GoodsItem();
 
@@ -57,11 +51,11 @@ export class GoodsController {
 
     @Put('/:goods/item/:id')
     @Authorized([Role.Administrator, Role.Manager])
-    @ResponseSchema(GoodsItemOutput)
+    @ResponseSchema(GoodsItem)
     updateOneItem(
         @Param('id') id: number,
         @CurrentUser() user: User,
-        @Body() { goods, ...data }: GoodsItemInput
+        @Body() { goods, ...data }: GoodsItem
     ) {
         return this.itemStore.save({
             ...data,
@@ -73,7 +67,7 @@ export class GoodsController {
 
     @Get('/:goods/item/:id')
     @OnNull(404)
-    @ResponseSchema(GoodsItemOutput)
+    @ResponseSchema(GoodsItem)
     getOneItem(@Param('id') id: number) {
         return this.itemStore.findOne({ where: { id } });
     }
@@ -101,10 +95,10 @@ export class GoodsController {
 
     @Post()
     @Authorized([Role.Administrator, Role.Manager])
-    @ResponseSchema(GoodsOutput)
+    @ResponseSchema(Goods)
     createOne(
         @CurrentUser() user: User,
-        @Body() { category, items, store, ...data }: GoodsInput
+        @Body() { category, items, store, ...data }: Goods
     ) {
         const goods = new Goods();
 
@@ -123,11 +117,11 @@ export class GoodsController {
 
     @Put('/:id')
     @Authorized([Role.Administrator, Role.Manager])
-    @ResponseSchema(GoodsOutput)
+    @ResponseSchema(Goods)
     updateOne(
         @Param('id') id: number,
         @CurrentUser() user: User,
-        @Body() { category, items, store, ...data }: GoodsInput
+        @Body() { category, items, store, ...data }: Goods
     ) {
         return this.goodsStore.save({
             ...data,
@@ -141,7 +135,7 @@ export class GoodsController {
 
     @Get('/:id')
     @OnNull(404)
-    @ResponseSchema(GoodsOutput)
+    @ResponseSchema(Goods)
     getOne(@Param('id') id: number) {
         return this.goodsStore.findOne({
             where: { id },

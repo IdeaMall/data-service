@@ -1,12 +1,4 @@
 import {
-    AddressInput,
-    AddressListChunk,
-    AddressOutput,
-    AddressOwner,
-    BaseFilter,
-    Role
-} from '@ideamall/data-model';
-import {
     Authorized,
     Body,
     CurrentUser,
@@ -23,7 +15,15 @@ import {
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
 
-import dataSource, { Address, User } from '../model';
+import {
+    dataSource,
+    Address,
+    User,
+    AddressOwner,
+    BaseFilter,
+    AddressListChunk,
+    Role
+} from '../model';
 
 @JsonController('/user/session/address')
 export class BuyerAddressController {
@@ -31,8 +31,8 @@ export class BuyerAddressController {
 
     @Post()
     @Authorized()
-    @ResponseSchema(AddressOutput)
-    createOne(@CurrentUser() user: User, @Body() data: AddressInput) {
+    @ResponseSchema(Address)
+    createOne(@CurrentUser() user: User, @Body() data: Address) {
         const address = new Address();
 
         address.createdBy = user;
@@ -43,11 +43,11 @@ export class BuyerAddressController {
     @Put('/:id')
     @Authorized()
     @OnNull(404)
-    @ResponseSchema(AddressOutput)
+    @ResponseSchema(Address)
     async updateOne(
         @Param('id') id: number,
         @CurrentUser() user: User,
-        @Body() data: AddressInput
+        @Body() data: Address
     ) {
         const address = await this.store.findOne({
             where: {
@@ -62,7 +62,7 @@ export class BuyerAddressController {
     @Get('/:id')
     @Authorized()
     @OnNull(404)
-    @ResponseSchema(AddressOutput)
+    @ResponseSchema(Address)
     getOne(@Param('id') id: number, @CurrentUser() user: User) {
         return this.store.findOne({
             where: {
@@ -115,8 +115,8 @@ export class SellerAddressController {
 
     @Post()
     @Authorized([Role.Administrator, Role.Manager])
-    @ResponseSchema(AddressOutput)
-    createOne(@CurrentUser() user: User, @Body() data: AddressInput) {
+    @ResponseSchema(Address)
+    createOne(@CurrentUser() user: User, @Body() data: Address) {
         const address = new Address();
 
         address.createdBy = user;
@@ -127,11 +127,11 @@ export class SellerAddressController {
     @Put('/:id')
     @Authorized([Role.Administrator, Role.Manager])
     @OnNull(404)
-    @ResponseSchema(AddressOutput)
+    @ResponseSchema(Address)
     async updateOne(
         @Param('id') id: number,
         @CurrentUser() user: User,
-        @Body() data: AddressInput
+        @Body() data: Address
     ) {
         const address = await this.store.findOne({
             where: { ownership: AddressOwner.Seller, id }
@@ -142,7 +142,7 @@ export class SellerAddressController {
     @Get('/:id')
     @Authorized()
     @OnNull(404)
-    @ResponseSchema(AddressOutput)
+    @ResponseSchema(Address)
     getOne(@Param('id') id: number) {
         return this.store.findOne({
             where: { ownership: AddressOwner.Seller, id }

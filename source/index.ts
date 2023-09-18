@@ -1,15 +1,14 @@
-import 'reflect-metadata';
 import 'dotenv/config';
+import 'reflect-metadata';
 
 import Koa from 'koa';
-import KoaLogger from 'koa-logger';
 import jwt from 'koa-jwt';
+import KoaLogger from 'koa-logger';
 import { useKoaServer } from 'routing-controllers';
 
 import { mocker, router, SessionController, swagger } from './controller';
-import dataSource, { isProduct } from './model';
-
-const { PORT = 8080, AUTHING_APP_SECRET } = process.env;
+import { dataSource } from './model';
+import { AUTHING_APP_SECRET, isProduct, PORT } from './utility';
 
 const HOST = `http://localhost:${PORT}`,
     app = new Koa()

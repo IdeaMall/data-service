@@ -1,4 +1,3 @@
-import { Role, UserOutput } from '@ideamall/data-model';
 import { JsonWebTokenError, sign, verify } from 'jsonwebtoken';
 import { intersection } from 'lodash';
 import {
@@ -13,15 +12,16 @@ import {
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
 
-import dataSource, {
+import {
     AuthingSession,
     JWTAction,
+    Role,
     SignInData,
-    User
+    User,
+    dataSource
 } from '../model';
+import { AUTHING_APP_SECRET } from '../utility';
 import { UserController } from './User';
-
-const { AUTHING_APP_SECRET } = process.env;
 
 @JsonController('/user/session')
 export class SessionController {
@@ -61,19 +61,19 @@ export class SessionController {
         return session;
     }
 
-    signToken(user: UserOutput) {
+    signToken(user: User) {
         return { ...user, token: sign({ ...user }, AUTHING_APP_SECRET) };
     }
 
     @Get()
     @Authorized()
-    @ResponseSchema(UserOutput)
-    getSession(@CurrentUser() user: UserOutput) {
+    @ResponseSchema(User)
+    getSession(@CurrentUser() user: User) {
         return user;
     }
 
     @Post('/authing')
-    @ResponseSchema(UserOutput)
+    @ResponseSchema(User)
     async signInAuthing(
         @HeaderParam('Authorization', { required: true }) token: string
     ) {
@@ -95,10 +95,8 @@ export class SessionController {
     }
 
     @Post()
-    @ResponseSchema(UserOutput)
-    async signIn(
-        @Body() { mobilePhone, password }: SignInData
-    ): Promise<UserOutput> {
+    @ResponseSchema(User)
+    async signIn(@Body() { mobilePhone, password }: SignInData): Promise<User> {
         const user = await this.store.findOne({
             where: {
                 mobilePhone,

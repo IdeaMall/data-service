@@ -1,10 +1,3 @@
-import {
-    Role,
-    UserFilter,
-    UserInput,
-    UserListChunk,
-    UserOutput
-} from '@ideamall/data-model';
 import { createHash } from 'crypto';
 import {
     Authorized,
@@ -25,9 +18,15 @@ import { ResponseSchema } from 'routing-controllers-openapi';
 import { Repository } from 'typeorm';
 import { uniqueID } from 'web-utility';
 
-import dataSource, { SignInData, User } from '../model';
-
-const { AUTHING_APP_SECRET } = process.env;
+import {
+    dataSource,
+    Role,
+    SignInData,
+    User,
+    UserFilter,
+    UserListChunk
+} from '../model';
+import { AUTHING_APP_SECRET } from '../utility';
 
 @JsonController('/user')
 export class UserController {
@@ -41,7 +40,7 @@ export class UserController {
 
     static async register(
         store: Repository<User>,
-        data: Partial<Omit<UserInput & UserOutput, 'createdAt' | 'updatedAt'>>
+        data: Partial<Omit<User, 'createdAt' | 'updatedAt'>>
     ) {
         const sum = await store.count();
 
@@ -54,18 +53,18 @@ export class UserController {
     }
 
     @Post()
-    @ResponseSchema(UserOutput)
+    @ResponseSchema(User)
     signUp(@Body() data: SignInData) {
         return UserController.register(this.store, data);
     }
 
     @Put('/:id')
     @Authorized()
-    @ResponseSchema(UserOutput)
+    @ResponseSchema(User)
     async updateOne(
         @Param('id') id: number,
         @CurrentUser() session: User,
-        @Body() { roles, ...data }: UserInput
+        @Body() { roles, ...data }: User
     ) {
         if (!roles?.length) {
             if (id !== session.id) throw new ForbiddenError();
@@ -83,7 +82,7 @@ export class UserController {
 
     @Get('/:id')
     @OnNull(404)
-    @ResponseSchema(UserOutput)
+    @ResponseSchema(User)
     getOne(@Param('id') id: number) {
         return this.store.findOne({ where: { id } });
     }

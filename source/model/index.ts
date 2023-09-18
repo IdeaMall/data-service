@@ -1,34 +1,32 @@
+import { ConnectionOptions, parse } from 'pg-connection-string';
 import { DataSource } from 'typeorm';
 import { SqliteConnectionOptions } from 'typeorm/driver/sqlite/SqliteConnectionOptions';
-import { ConnectionOptions, parse } from 'pg-connection-string';
 
-import { User } from './User';
+import { DATABASE_URL, isProduct } from '../utility';
 import { Address } from './Address';
 import { Category } from './Category';
+import { Comment } from './Comment';
+import { Favorite } from './Favorite';
 import { Goods } from './Goods';
 import { GoodsItem } from './GoodsItem';
-import { Favorite } from './Favorite';
 import { Order } from './Order';
 import { Parcel } from './Parcel';
-import { Comment } from './Comment';
+import { User } from './User';
 
-export * from './Base';
-export * from './File';
-export * from './User';
 export * from './Address';
+export * from './Base';
 export * from './Category';
+export * from './Comment';
+export * from './Favorite';
+export * from './File';
 export * from './Goods';
 export * from './GoodsItem';
-export * from './Favorite';
 export * from './Order';
 export * from './Parcel';
-export * from './Comment';
+export * from './Statistic';
+export * from './User';
 
-const { NODE_ENV, DATABASE_URL } = process.env;
-
-export const isProduct = NODE_ENV === 'production';
-
-const { host, port, user, password, database } = isProduct
+const { ssl, host, port, user, password, database } = isProduct
     ? parse(DATABASE_URL)
     : ({} as ConnectionOptions);
 
@@ -51,9 +49,10 @@ const commonOptions: Pick<
     migrations: [`${isProduct ? '.data' : 'migration'}/*.ts`]
 };
 
-export default isProduct
+export const dataSource = isProduct
     ? new DataSource({
           type: 'postgres',
+          ssl: ssl as boolean,
           host,
           port: +port,
           username: user,
