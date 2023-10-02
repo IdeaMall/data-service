@@ -48,6 +48,10 @@ export interface JWTAction {
 
 @Entity()
 export class User extends Base {
+    @IsString()
+    @Column({ nullable: true })
+    uuid: string;
+
     @IsMobilePhone()
     @Column({ unique: true })
     mobilePhone: string;
@@ -79,6 +83,8 @@ export class User extends Base {
     @IsString()
     @IsOptional()
     token?: string;
+
+    iat?: number;
 }
 
 export abstract class UserBase extends Base {
@@ -93,7 +99,7 @@ export abstract class UserBase extends Base {
     updatedBy: User;
 }
 
-export type UserInputData<T> = NewData<Omit<T, keyof UserBase>, UserBase>;
+export type UserInputData<T> = NewData<Omit<T, keyof UserBase>, Base>;
 
 export class UserFilter extends BaseFilter implements Partial<InputData<User>> {
     @IsMobilePhone()

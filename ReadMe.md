@@ -15,6 +15,31 @@
 5. API document: [Swagger][11]
 6. Mock API: [OpenAPI backend][12]
 
+## API Usage
+
+-   Entry: http://localhost:8080/
+-   Document: http://localhost:8080/docs/
+-   Schema: http://localhost:8080/docs/spec/
+
+### Type package
+
+#### Sign in GitHub packages with NPM
+
+1. Generate a [PAT][13] with `read:packages` authorization
+2. Run Sign-in command in your terminal, and use PAT as password:
+
+```shell
+npm login --scope=@ideamall --registry=https://npm.pkg.github.com
+```
+
+#### Installation
+
+```shell
+npm i pnpm -g
+
+pnpm i @ideamall/data-service -D
+```
+
 ## Environment variables
 
 |         Name         |            Usage             |
@@ -23,44 +48,66 @@
 |    `DATABASE_URL`    | PostgreSQL connection string |
 | `AUTHING_APP_SECRET` | Secret Key of Authing.cn App |
 
-## Usage
+## Development
 
-### Development
-
-Execute a command:
+### Installation
 
 ```shell
 npm i pnpm -g
+pnpm i
+```
+
+### Start Development environment
+
+```shell
 pnpm dev
 ```
 
-or just press <kbd>F5</kbd> key in [VS Code][13].
+or just press <kbd>F5</kbd> key in [VS Code][14].
 
-#### Migration
+### Migration
 
 ```shell
 pnpm upgrade:dev
 ```
 
-### Deployment
+## Deployment
 
-Execute a command:
+### Start Production environment
 
 ```shell
 npm start
 ```
 
-#### Migration
+### Migration
 
 ```shell
 pnpm upgrade:pro
 ```
 
-#### Docker
+### Docker
 
 ```shell
 pnpm pack-image
 pnpm container
+```
+
+## Releasing
+
+### Deploy Application
+
+```shell
+git checkout master
+git tag v1.0.0  # this version tag comes from ./package.json
+git push origin master --tags
+```
+
+### Publish Type Package
+
+```shell
+git checkout master
+git tag type-v1.0.0  # this version tag comes from ./type/package.json
+git push origin master --tags
 ```
 
 [1]: https://en.wikipedia.org/wiki/Representational_state_transfer
@@ -75,4 +122,5 @@ pnpm container
 [10]: https://typeorm.io/
 [11]: https://swagger.io/
 [12]: https://github.com/anttiviljami/openapi-backend
-[13]: https://code.visualstudio.com/
+[13]: https://github.com/settings/tokens
+[14]: https://code.visualstudio.com/

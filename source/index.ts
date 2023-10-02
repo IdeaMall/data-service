@@ -23,7 +23,7 @@ useKoaServer(app, {
     cors: true,
     authorizationChecker: async (action, roles) =>
         !!(await SessionController.getSession(action, roles)),
-    currentUserChecker: SessionController.getSession
+    currentUserChecker: action => SessionController.getSession(action)
 });
 
 console.time('Server boot');

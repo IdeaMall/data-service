@@ -27,14 +27,21 @@ import { UserController } from './User';
 export class SessionController {
     store = dataSource.getRepository(User);
 
+    static signToken(user: User) {
+        return { ...user, token: sign({ ...user }, AUTHING_APP_SECRET) };
+    }
+
+    static fixPhoneNumber(raw: string) {
+        return raw.startsWith('+') ? raw : `+86${raw}`;
+    }
+
     static getAuthingUser(token: string): AuthingSession {
         var { phone_number, ...session } = verify(
             token.split(/\s+/)[1],
             AUTHING_APP_SECRET
         ) as AuthingSession;
 
-        if (phone_number && !phone_number.startsWith('+86'))
-            phone_number = '+86' + phone_number;
+        if (phone_number) phone_number = this.fixPhoneNumber(phone_number);
 
         return { ...session, phone_number };
     }
@@ -47,11 +54,15 @@ export class SessionController {
 
         const { user } = state;
 
-        if (!('userpool_id' in user)) return user;
+        if (!user) return;
 
-        const session = await dataSource
-            .getRepository(User)
-            .findOne({ where: { mobilePhone: user.phone_number } });
+        if (!('userpool_id' in user)) {
+            delete user.iat;
+            return user;
+        }
+        const session = await dataSource.getRepository(User).findOne({
+            where: { mobilePhone: this.fixPhoneNumber(user.phone_number) }
+        });
 
         if (!session) return;
 
@@ -59,10 +70,6 @@ export class SessionController {
             throw new ForbiddenError();
 
         return session;
-    }
-
-    signToken(user: User) {
-        return { ...user, token: sign({ ...user }, AUTHING_APP_SECRET) };
     }
 
     @Get()
@@ -78,6 +85,7 @@ export class SessionController {
         @HeaderParam('Authorization', { required: true }) token: string
     ) {
         const {
+            sub,
             phone_number: mobilePhone,
             nickname,
             picture
@@ -87,11 +95,12 @@ export class SessionController {
 
         const registered = await UserController.register(this.store, {
             ...existed,
+            uuid: sub,
             mobilePhone,
             nickName: nickname,
             avatar: picture
         });
-        return this.signToken(registered);
+        return SessionController.signToken(registered);
     }
 
     @Post()
@@ -105,6 +114,6 @@ export class SessionController {
         });
         if (!user) throw new ForbiddenError();
 
-        return this.signToken(user);
+        return SessionController.signToken(user);
     }
 }
