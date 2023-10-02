@@ -1,5 +1,6 @@
-import { fromBuffer } from 'file-type';
 import { File } from '@koa/multer';
+import type {} from '@supabase/storage-js';
+import { fromBuffer } from 'file-type';
 import {
     Authorized,
     BadRequestError,
@@ -12,10 +13,11 @@ import { ResponseSchema } from 'routing-controllers-openapi';
 import { uniqueID } from 'web-utility';
 
 import { FileOutput, supabase, User } from '../model';
+import { SUPABASE_FILE_BUCKET } from '../utility';
 
 @JsonController('/file')
 export class FileController {
-    storage = supabase.storage.from(process.env.SUPABASE_FILE_BUCKET);
+    storage = supabase.storage.from(SUPABASE_FILE_BUCKET);
 
     @Post()
     @Authorized()

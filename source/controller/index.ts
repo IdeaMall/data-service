@@ -1,6 +1,7 @@
+import type {} from 'koa2-swagger-ui';
 import { createAPI } from 'koagger';
 
-import { isProduct } from '../model';
+import { isProduct } from '../utility';
 import { BuyerAddressController, SellerAddressController } from './Address';
 import { CategoryController } from './Category';
 import { CommentController } from './Comment';

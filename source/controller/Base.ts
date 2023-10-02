@@ -1,22 +1,21 @@
-import { Constructor } from 'web-utility';
 import {
-    JsonController,
-    Get,
-    Post,
-    Patch,
-    Delete,
-    Param,
     Body,
+    Delete,
+    Get,
+    JsonController,
+    OnNull,
     OnUndefined,
-    OnNull
+    Param,
+    Patch,
+    Post
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
 import { Repository } from 'typeorm';
-import { BaseOutput } from '@ideamall/data-model';
+import { Constructor } from 'web-utility';
 
-import dataSource, { Base } from '../model';
+import { Base, dataSource } from '../model';
 
-export function Controller<M extends BaseOutput, E extends Base>(
+export function Controller<M extends Base, E extends Base>(
     rootPath: `/${string}`,
     Model: Constructor<M>,
     Entity: Constructor<E>

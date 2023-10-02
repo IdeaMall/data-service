@@ -1,10 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import { IsString } from 'class-validator';
 
-export const supabase = createClient(
-    process.env.SUPABASE_APP_HOST,
-    process.env.SUPABASE_APP_KEY
-);
+import { SUPABASE_APP_HOST, SUPABASE_APP_KEY } from '../utility';
+
+export const supabase = createClient(SUPABASE_APP_HOST, SUPABASE_APP_KEY);
 
 export class FileOutput {
     @IsString()

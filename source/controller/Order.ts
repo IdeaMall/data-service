@@ -1,8 +1,7 @@
-import { OrderOutput } from '@ideamall/data-model';
 import { JsonController } from 'routing-controllers';
 
 import { Order } from '../model';
 import { Controller } from './Base';
 
 @JsonController('/order')
-export class OrderController extends Controller('/order', OrderOutput, Order) {}
+export class OrderController extends Controller('/order', Order, Order) {}

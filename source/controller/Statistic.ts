@@ -1,14 +1,15 @@
-import { StatisticSummary } from '@ideamall/data-model';
 import { Get, JsonController } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
 
-import dataSource, {
+import {
     Category,
     Comment,
     Goods,
     Order,
     Parcel,
-    User
+    StatisticSummary,
+    User,
+    dataSource
 } from '../model';
 
 @JsonController('/statistic')
