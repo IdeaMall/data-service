@@ -76,7 +76,7 @@
         "prepare": "husky install",
         "dev": "ts-node-dev source/",
         "test": "lint-staged",
-        "build": "rm -rf dist/ type/*.d.ts  &&  tsc  &&  mv dist/model/*.d.ts type/",
+        "build": "rm -rf dist/ type/*.d.ts  &&  tsc  &&  mv dist/model/*.d.ts type/  &&  cp dist/model/constant.js type/index.js",
         "start": "cross-env NODE_ENV=production  node dist/",
         "typeorm": "typeorm-ts-node-commonjs -d source/model/index.ts",
         "migration:generate": "npm run typeorm -- migration:generate",

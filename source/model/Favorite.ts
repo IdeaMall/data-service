@@ -11,11 +11,7 @@ import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { BaseFilter, ListChunk } from './Base';
 import { Goods } from './Goods';
 import { UserBase, UserInputData } from './User';
-
-export enum FavoriteType {
-    Like = 0,
-    Cart = 1
-}
+import { FavoriteType } from './constant';
 
 @Entity()
 export class Favorite extends UserBase {

@@ -25,6 +25,7 @@ export * from './Order';
 export * from './Parcel';
 export * from './Statistic';
 export * from './User';
+export * from './constant';
 
 const { ssl, host, port, user, password, database } = isProduct
     ? parse(DATABASE_URL)

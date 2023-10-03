@@ -17,18 +17,7 @@ import { NewData } from 'mobx-restful';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 import { Base, BaseFilter, InputData, ListChunk } from './Base';
-
-export enum Gender {
-    Female = 0,
-    Male = 1,
-    Other = 2
-}
-
-export enum Role {
-    Administrator = 0,
-    Manager = 1,
-    Client = 2
-}
+import { Gender, Role } from './constant';
 
 export class SignInData
     implements Required<Pick<User, 'mobilePhone' | 'password'>>

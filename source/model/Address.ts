@@ -12,11 +12,7 @@ import { Column, Entity } from 'typeorm';
 
 import { ListChunk } from './Base';
 import { UserBase } from './User';
-
-export enum AddressOwner {
-    Seller,
-    Buyer
-}
+import { AddressOwner } from './constant';
 
 @Entity()
 export class Address extends UserBase {
