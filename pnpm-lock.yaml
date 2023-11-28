@@ -15,11 +15,11 @@ dependencies:
     specifier: ^12.0.1
     version: 12.0.1
   '@supabase/storage-js':
-    specifier: ^2.5.4
-    version: 2.5.4
+    specifier: ^2.5.5
+    version: 2.5.5
   '@supabase/supabase-js':
-    specifier: ^2.38.5
-    version: 2.38.5
+    specifier: ^2.39.0
+    version: 2.39.0
   authing-js-sdk:
     specifier: ^4.23.49
     version: 4.23.49
@@ -574,21 +574,21 @@ packages:
       - supports-color
     dev: false
 
-  /@supabase/storage-js@2.5.4:
-    resolution: {integrity: sha512-yspHD19I9uQUgfTh0J94+/r/g6hnhdQmw6Y7OWqr/EbnL6uvicGV1i1UDkkmeUHqfF9Mbt2sLtuxRycYyKv2ew==}
+  /@supabase/storage-js@2.5.5:
+    resolution: {integrity: sha512-OpLoDRjFwClwc2cjTJZG8XviTiQH4Ik8sCiMK5v7et0MDu2QlXjCAW3ljxJB5+z/KazdMOTnySi+hysxWUPu3w==}
     dependencies:
       '@supabase/node-fetch': 2.6.15
     dev: false
 
-  /@supabase/supabase-js@2.38.5:
-    resolution: {integrity: sha512-QTXld3AfwAJgeOGyOKsCcT7AjC3jJxN02iHy299Fw+qKX0lJ1tVVhMGlga101C1stUCvgzjcypmMSGiZ2oeKsw==}
+  /@supabase/supabase-js@2.39.0:
+    resolution: {integrity: sha512-cYfnwWRW5rYBbPT/BNIejtRT9ULdD9PnIExQV28PZpqcqm3PLwS4f3pY7WGB01Da63VYdvktZPKuYvreqsj/Zg==}
     dependencies:
       '@supabase/functions-js': 2.1.5
       '@supabase/gotrue-js': 2.57.0
       '@supabase/node-fetch': 2.6.15
       '@supabase/postgrest-js': 1.9.0
       '@supabase/realtime-js': 2.8.4
-      '@supabase/storage-js': 2.5.4
+      '@supabase/storage-js': 2.5.5
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -857,6 +857,7 @@ packages:
   /ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
     engines: {node: '>=8'}
+    requiresBuild: true
 
   /ansi-regex@6.0.1:
     resolution: {integrity: sha512-n5M855fKb2SsfMIiFFoVrABHJC8QtHwVx+mHWP3QcEqBHYienj5dHSgjbxtC0WEZXYt4wcD6zrQElDPhFuZgfA==}
