@@ -1,25 +1,33 @@
-import 'dotenv/config';
+import { config } from 'dotenv';
 import 'reflect-metadata';
+
+config({ path: [`.env.${process.env.NODE_ENV}.local`, '.env.local', '.env'] });
 
 import Koa from 'koa';
 import jwt from 'koa-jwt';
 import KoaLogger from 'koa-logger';
 import { useKoaServer } from 'routing-controllers';
 
-import { mocker, router, SessionController, swagger } from './controller';
+import {
+    BaseController,
+    controllers,
+    mocker,
+    SessionController,
+    swagger
+} from './controller';
 import { dataSource } from './model';
-import { AUTHING_APP_SECRET, isProduct, PORT } from './utility';
+import { APP_SECRET, isProduct, PORT } from './utility';
 
-const HOST = `http://localhost:${PORT}`,
+const HOST = `localhost:${PORT}`,
     app = new Koa()
         .use(KoaLogger())
         .use(swagger({ exposeSpec: true }))
-        .use(jwt({ secret: AUTHING_APP_SECRET, passthrough: true }));
+        .use(jwt({ secret: APP_SECRET, passthrough: true }));
 
 if (!isProduct) app.use(mocker());
 
 useKoaServer(app, {
-    ...router,
+    controllers,
     cors: true,
     authorizationChecker: async (action, roles) =>
         !!(await SessionController.getSession(action, roles)),
@@ -30,12 +38,7 @@ console.time('Server boot');
 
 dataSource.initialize().then(() =>
     app.listen(PORT, () => {
-        console.log(`
-HTTP served at ${HOST}
-Swagger API served at ${HOST}/docs/
-Swagger API exposed at ${HOST}/docs/spec`);
-
-        if (!isProduct) console.log(`Mock API served at ${HOST}/mock/\n`);
+        console.log(BaseController.entryOf(HOST));
 
         console.timeEnd('Server boot');
     })

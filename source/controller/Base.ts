@@ -1,66 +1,29 @@
-import {
-    Body,
-    Delete,
-    Get,
-    JsonController,
-    OnNull,
-    OnUndefined,
-    Param,
-    Patch,
-    Post
-} from 'routing-controllers';
-import { ResponseSchema } from 'routing-controllers-openapi';
-import { Repository } from 'typeorm';
-import { Constructor } from 'web-utility';
+import { marked } from 'marked';
+import { Controller, Get, HeaderParam, HttpCode } from 'routing-controllers';
 
-import { Base, dataSource } from '../model';
+import { isProduct } from '../utility';
 
-export function Controller<M extends Base, E extends Base>(
-    rootPath: `/${string}`,
-    Model: Constructor<M>,
-    Entity: Constructor<E>
-) {
-    type Model = typeof Model;
+@Controller()
+export class BaseController {
+    static entryOf(host: string) {
+        host = 'http://' + host;
 
-    @JsonController(rootPath)
-    abstract class BaseController {
-        store = dataSource.getRepository(Entity);
-
-        @Post()
-        @ResponseSchema(Model)
-        createOne(@Body() data: Model) {
-            const entity = new Entity();
-
-            return this.store.save(Object.assign(entity, data));
-        }
-
-        @Patch('/:id')
-        @ResponseSchema(Model)
-        async updateOne(@Param('id') id: number, @Body() data: Model) {
-            const { raw } = await this.store.update(id, { ...data });
-
-            return raw;
-        }
-
-        @Get('/:id')
-        @OnNull(404)
-        @ResponseSchema(Model)
-        getOne(@Param('id') id: number) {
-            return (this.store as Repository<Base>).findOne({ where: { id } });
-        }
-
-        @Delete('/:id')
-        @OnUndefined(204)
-        async deleteOne(@Param('id') id: number) {
-            await this.store.delete(id);
-        }
-
-        @Get()
-        async getList() {
-            const [list, count] = await this.store.findAndCount();
-
-            return { list, count };
-        }
+        return `
+- HTTP served at ${host}
+- Swagger API served at ${host}/docs/
+- Swagger API exposed at ${host}/docs/spec
+${isProduct ? '' : `- Mock API served at ${host}/mock/`}
+`;
     }
-    return BaseController;
+
+    @Get('/_health')
+    @HttpCode(200)
+    getHealthStatus() {
+        return '';
+    }
+
+    @Get()
+    getIndex(@HeaderParam('host') host: string) {
+        return marked(BaseController.entryOf(host));
+    }
 }

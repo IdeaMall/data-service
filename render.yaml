@@ -2,13 +2,13 @@ services:
     - type: web
       name: ideamall-data-service
       plan: free
-      env: node
+      runtime: node
       buildCommand: npm install  &&  npm run build
       startCommand: npm start
       healthCheckPath: /_health
       envVars:
           - key: NODE_VERSION
-            value: 18.17.0
+            value: 20
           - key: NODE_ENV
             value: production
           - key: DATABASE_URL

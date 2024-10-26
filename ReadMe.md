@@ -45,11 +45,14 @@ pnpm i @ideamall/data-service -D
 
 ## Environment variables
 
-|         Name         |            Usage             |
-| :------------------: | :--------------------------: |
-|     `APP_SECRET`     |   encrypt Password & Token   |
-|    `DATABASE_URL`    | PostgreSQL connection string |
-| `AUTHING_APP_SECRET` | Secret Key of Authing.cn App |
+|         Name         |             Usage             |
+| :------------------: | :---------------------------: |
+|     `APP_SECRET`     |   encrypt Password & Token    |
+|    `DATABASE_URL`    | PostgreSQL connection string  |
+|     `APP_SECRET`     |   encrypt Password & Token    |
+| `LEANCLOUD_API_HOST` | API domain of [LeanCloud][16] |
+|  `LEANCLOUD_APP_ID`  |   App ID of [LeanCloud][16]   |
+| `LEANCLOUD_APP_KEY`  |  App Key of [LeanCloud][16]   |
 
 ## Development
 
@@ -66,7 +69,7 @@ pnpm i
 pnpm dev
 ```
 
-or just press <kbd>F5</kbd> key in [VS Code][16].
+or just press <kbd>F5</kbd> key in [VS Code][17].
 
 ### Migration
 
@@ -128,4 +131,5 @@ git push origin master --tags
 [13]: https://swagger.io/
 [14]: https://github.com/anttiviljami/openapi-backend
 [15]: https://github.com/settings/tokens
-[16]: https://code.visualstudio.com/
+[16]: https://leancloud.cn/
+[17]: https://code.visualstudio.com/

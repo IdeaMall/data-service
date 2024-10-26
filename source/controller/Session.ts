@@ -1,4 +1,4 @@
-import { JsonWebTokenError, sign, verify } from 'jsonwebtoken';
+import { JsonWebTokenError, sign } from 'jsonwebtoken';
 import { intersection } from 'lodash';
 import {
     Authorized,
@@ -6,44 +6,31 @@ import {
     CurrentUser,
     ForbiddenError,
     Get,
-    HeaderParam,
+    HttpCode,
     JsonController,
+    OnUndefined,
     Post
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
 
 import {
-    AuthingSession,
+    Captcha,
     JWTAction,
     Role,
+    SMSCodeInput,
     SignInData,
     User,
     dataSource
 } from '../model';
-import { AUTHING_APP_SECRET } from '../utility';
+import { APP_SECRET, leanClient } from '../utility';
 import { UserController } from './User';
+
+const store = dataSource.getRepository(User);
 
 @JsonController('/user/session')
 export class SessionController {
-    store = dataSource.getRepository(User);
-
     static signToken(user: User) {
-        return { ...user, token: sign({ ...user }, AUTHING_APP_SECRET) };
-    }
-
-    static fixPhoneNumber(raw: string) {
-        return raw.startsWith('+') ? raw : `+86${raw}`;
-    }
-
-    static getAuthingUser(token: string): AuthingSession {
-        var { phone_number, ...session } = verify(
-            token.split(/\s+/)[1],
-            AUTHING_APP_SECRET
-        ) as AuthingSession;
-
-        if (phone_number) phone_number = this.fixPhoneNumber(phone_number);
-
-        return { ...session, phone_number };
+        return { ...user, token: sign({ ...user }, APP_SECRET) };
     }
 
     static async getSession(
@@ -56,13 +43,7 @@ export class SessionController {
 
         if (!user) return;
 
-        if (!('userpool_id' in user)) {
-            delete user.iat;
-            return user;
-        }
-        const session = await dataSource.getRepository(User).findOne({
-            where: { mobilePhone: this.fixPhoneNumber(user.phone_number) }
-        });
+        const session = await store.findOneBy({ id: user.id });
 
         if (!session) return;
 
@@ -79,40 +60,50 @@ export class SessionController {
         return user;
     }
 
-    @Post('/authing')
-    @ResponseSchema(User)
-    async signInAuthing(
-        @HeaderParam('Authorization', { required: true }) token: string
-    ) {
-        const {
-            sub,
-            phone_number: mobilePhone,
-            nickname,
-            picture
-        } = SessionController.getAuthingUser(token);
-
-        const existed = await this.store.findOne({ where: { mobilePhone } });
-
-        const registered = await UserController.register(this.store, {
-            ...existed,
-            uuid: sub,
-            mobilePhone,
-            nickName: nickname,
-            avatar: picture
-        });
-        return SessionController.signToken(registered);
+    @Post('/captcha')
+    @ResponseSchema(Captcha)
+    async createCaptcha() {
+        const { body } =
+            await leanClient.get<Record<`captcha_${'token' | 'url'}`, string>>(
+                'requestCaptcha'
+            );
+        return { token: body.captcha_token, link: body.captcha_url };
     }
 
-    @Post()
-    @ResponseSchema(User)
-    async signIn(@Body() { mobilePhone, password }: SignInData): Promise<User> {
-        const user = await this.store.findOne({
-            where: {
-                mobilePhone,
-                password: UserController.encrypt(password)
-            }
+    static async verifyCaptcha(captcha_token: string, captcha_code: string) {
+        const { body } = await leanClient.post<{ validate_token: string }>(
+            'verifyCaptcha',
+            { captcha_code, captcha_token }
+        );
+        return { token: body.validate_token };
+    }
+
+    @Post('/SMS-code')
+    @OnUndefined(201)
+    async createSMSCode(
+        @Body() { captchaToken, captchaCode, mobilePhone }: SMSCodeInput
+    ) {
+        if (captchaToken && captchaCode)
+            var { token } = await SessionController.verifyCaptcha(
+                captchaToken,
+                captchaCode
+            );
+        await leanClient.post<{}>('requestSmsCode', {
+            mobilePhoneNumber: mobilePhone,
+            validate_token: token
         });
-        if (!user) throw new ForbiddenError();
+    }
+
+    static verifySMSCode = (mobilePhoneNumber: string, code: string) =>
+        leanClient.post<{}>(`verifySmsCode/${code}`, { mobilePhoneNumber });
+
+    @Post()
+    @HttpCode(201)
+    @ResponseSchema(User)
+    async signIn(@Body() { mobilePhone, code }: SignInData): Promise<User> {
+        await SessionController.verifySMSCode(mobilePhone, code);
+
+        const user = await UserController.register({ mobilePhone, code });
 
         return SessionController.signToken(user);
     }
