@@ -1,11 +1,11 @@
 {
     "name": "@ideamall/data-service",
-    "version": "1.0.0-alpha.1",
+    "version": "1.0.0-beta.0",
     "types": "index.d.ts",
     "main": "index.js",
     "dependencies": {
-        "@types/jsonwebtoken": "^9.0.5",
-        "@types/koa": "^2.13.12",
-        "mobx-restful": "^0.6.12"
+        "@types/jsonwebtoken": "^9.0.7",
+        "@types/koa": "^2.15.0",
+        "mobx-restful": "^1.0.1"
     }
 }

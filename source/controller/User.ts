@@ -15,7 +15,7 @@ import {
     QueryParams
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
-import { Repository } from 'typeorm';
+import { Like } from 'typeorm';
 import { uniqueID } from 'web-utility';
 
 import {
@@ -26,36 +26,42 @@ import {
     UserFilter,
     UserListChunk
 } from '../model';
-import { AUTHING_APP_SECRET } from '../utility';
+import { APP_SECRET, searchConditionOf } from '../utility';
+import { ActivityLogController } from './ActivityLog';
+import { SessionController } from './Session';
+
+const store = dataSource.getRepository(User);
 
 @JsonController('/user')
 export class UserController {
-    store = dataSource.getRepository(User);
-
-    static encrypt(raw: string) {
-        return createHash('sha1')
-            .update(AUTHING_APP_SECRET + raw)
+    static encrypt = (raw: string) =>
+        createHash('sha1')
+            .update(APP_SECRET + raw)
             .digest('hex');
-    }
 
-    static async register(
-        store: Repository<User>,
-        data: Partial<Omit<User, 'createdAt' | 'updatedAt'>>
-    ) {
+    static async register(data: SignInData) {
+        const existed = await store.findOneBy({
+            mobilePhone: Like(`%${data.mobilePhone}`)
+        });
+
+        if (existed) return existed;
+
         const sum = await store.count();
 
-        const { id } = await store.save({
-            roles: [!data.id && !sum ? Role.Administrator : Role.Client],
+        const saved = await store.save({
+            roles: [!sum ? Role.Administrator : Role.Client],
             ...data,
             password: UserController.encrypt(data.password || uniqueID())
         });
-        return store.findOne({ where: { id } });
+        await ActivityLogController.logCreate(saved, 'User', saved.id);
+
+        return saved;
     }
 
     @Post()
     @ResponseSchema(User)
     signUp(@Body() data: SignInData) {
-        return UserController.register(this.store, data);
+        return UserController.register(data);
     }
 
     @Put('/:id')
@@ -66,25 +72,25 @@ export class UserController {
         @CurrentUser() session: User,
         @Body() { roles, ...data }: User
     ) {
-        if (!roles?.length) {
-            if (id !== session.id) throw new ForbiddenError();
-
-            return this.store.save({ ...data, id });
-        }
-
-        if (!session.roles?.includes(Role.Administrator))
+        if (
+            roles?.length
+                ? !session.roles.includes(Role.Administrator)
+                : id !== session.id
+        )
             throw new ForbiddenError();
 
-        await this.store.save({ id, roles });
+        const saved = await store.save({ ...data, roles, id });
 
-        return { ...data, roles };
+        await ActivityLogController.logUpdate(session, 'User', id);
+
+        return SessionController.signToken(saved);
     }
 
     @Get('/:id')
     @OnNull(404)
     @ResponseSchema(User)
     getOne(@Param('id') id: number) {
-        return this.store.findOne({ where: { id } });
+        return store.findOneBy({ id });
     }
 
     @Delete('/:id')
@@ -97,13 +103,21 @@ export class UserController {
         if (!roles.includes(Role.Administrator) && id !== ID)
             throw new ForbiddenError();
 
-        await this.store.delete(id);
+        await store.delete(id);
     }
 
     @Get()
     @ResponseSchema(UserListChunk)
-    async getList(@QueryParams() { pageSize, pageIndex }: UserFilter) {
-        const [list, count] = await this.store.findAndCount({
+    async getList(
+        @QueryParams() { gender, keywords, pageSize, pageIndex }: UserFilter
+    ) {
+        const where = searchConditionOf<User>(
+            ['mobilePhone', 'nickName'],
+            keywords,
+            gender && { gender }
+        );
+        const [list, count] = await store.findAndCount({
+            where,
             skip: pageSize * (pageIndex - 1),
             take: pageSize
         });

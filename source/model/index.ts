@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { SqliteConnectionOptions } from 'typeorm/driver/sqlite/SqliteConnectionOptions';
 
 import { DATABASE_URL, isProduct } from '../utility';
+import { ActivityLog } from './ActivityLog';
 import { Address } from './Address';
 import { Category } from './Category';
 import { Comment } from './Comment';
@@ -13,6 +14,7 @@ import { Order } from './Order';
 import { Parcel } from './Parcel';
 import { User } from './User';
 
+export * from './ActivityLog';
 export * from './Address';
 export * from './Base';
 export * from './Category';
@@ -33,11 +35,13 @@ const { ssl, host, port, user, password, database } = isProduct
 
 const commonOptions: Pick<
     SqliteConnectionOptions,
-    'synchronize' | 'entities' | 'migrations'
+    'logging' | 'synchronize' | 'entities' | 'migrations'
 > = {
+    logging: true,
     synchronize: true,
     entities: [
         User,
+        ActivityLog,
         Address,
         Category,
         Goods,
@@ -59,12 +63,10 @@ export const dataSource = isProduct
           username: user,
           password,
           database,
-          logging: true,
           ...commonOptions
       })
     : new DataSource({
           type: 'sqlite',
           database: '.data/test.db',
-          logging: false,
           ...commonOptions
       });

@@ -1,5 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import {
+    IsDateString,
+    IsInt,
+    IsOptional,
+    IsString,
+    Min
+} from 'class-validator';
 import { NewData } from 'mobx-restful';
 import {
     CreateDateColumn,
@@ -17,15 +23,15 @@ export abstract class Base {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @IsDate()
+    @IsDateString()
     @IsOptional()
     @CreateDateColumn()
-    createdAt: Date;
+    createdAt: string;
 
-    @IsDate()
+    @IsDateString()
     @IsOptional()
     @UpdateDateColumn()
-    updatedAt: Date;
+    updatedAt: string;
 }
 
 export type InputData<T> = NewData<Omit<T, keyof Base>, Base>;
@@ -48,7 +54,7 @@ export class BaseFilter {
     keywords?: string;
 }
 
-export interface ListChunk<T extends Base> {
+export interface ListChunk<T> {
     count: number;
     list: T[];
 }
